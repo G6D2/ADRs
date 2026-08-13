@@ -1,0 +1,29 @@
+name: adr-lint
+
+on:
+  pull_request:
+    paths:
+      - "adr/**"
+      - "tools/adr"
+  push:
+    branches-ignore: [main]
+    paths:
+      - "adr/**"
+      - "tools/adr"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validar ADRs
+        run: tools/adr lint
+
+      - name: Verificar que el índice esté actualizado
+        run: |
+          tools/adr index
+          if ! git diff --exit-code adr/README.md; then
+            echo "::error::El índice adr/README.md está desactualizado. Ejecute 'tools/adr index' y agregue el cambio al commit."
+            exit 1
+          fi

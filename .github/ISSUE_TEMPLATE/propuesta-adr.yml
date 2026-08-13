@@ -1,0 +1,34 @@
+name: Propuesta de ADR
+description: Proponer una decisión de arquitectura para discutir antes de redactar el ADR.
+title: "[ADR] <frase verbal en imperativo, p. ej.: elegir base de datos>"
+labels: [adr, propuesta]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: ¿Qué problema o situación motiva esta decisión? ¿Qué fuerzas están en juego?
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decisión propuesta
+      description: ¿Qué cambio se propone? Redactar en voz activa ("Vamos a ...").
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+      description: Otras opciones evaluadas y por qué se descartan.
+  - type: textarea
+    id: consecuencias
+    attributes:
+      label: Consecuencias esperadas
+      description: ¿Qué se vuelve más fácil y qué más difícil con este cambio?
+  - type: input
+    id: decisores
+    attributes:
+      label: Decisores
+      description: Personas o roles que deben participar de la decisión.

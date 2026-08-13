@@ -1,0 +1,32 @@
+name: adr-index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "adr/**"
+      - "tools/adr"
+
+permissions:
+  contents: write
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Regenerar índice
+        run: tools/adr index
+
+      - name: Commitear índice si cambió
+        run: |
+          if git diff --quiet adr/README.md; then
+            echo "El índice ya está actualizado."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add adr/README.md
+          git commit -m "chore(adr): regenerar índice"
+          git push
