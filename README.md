@@ -5,6 +5,8 @@ GitHub y publicada como sitio en **GitHub Pages**, siguiendo los lineamientos
 de
 [G6D2/architecture-decision-record](https://github.com/G6D2/architecture-decision-record).
 
+📖 **Sitio publicado: <https://g6d2.github.io/ADRs/>**
+
 ## Estructura
 
 ```
@@ -32,7 +34,8 @@ tools/site/                   Assets del sitio de GitHub Pages
 
 ## Índice de decisiones
 
-Ver [adr/README.md](adr/README.md).
+Ver el [sitio publicado](https://g6d2.github.io/ADRs/) o el índice en el
+repositorio: [adr/README.md](adr/README.md).
 
 ## Flujo de trabajo en GitHub
 
@@ -89,14 +92,16 @@ por estado, más un visor por ADR con su historial. No tiene dependencias
 externas ni backend; es de solo lectura y la gestión sigue siendo por pull
 requests.
 
+- Está publicado en <https://g6d2.github.io/ADRs/>.
 - El workflow [`adr-pages`](.github/workflows/adr-pages.yml) genera el sitio
-  con `tools/adr site` y lo despliega en cada push a `main`.
-- **Activación (una sola vez)**: en el repositorio, ir a
-  **Settings → Pages → Build and deployment → Source** y elegir
-  **GitHub Actions**. El sitio quedará en
-  `https://g6d2.github.io/ADRs/`.
+  con `tools/adr site` y lo despliega en cada push a `main`, por lo que el
+  sitio siempre refleja el estado del registro. También puede lanzarse a mano
+  desde la pestaña Actions (`workflow_dispatch`).
 - Para probarlo localmente: `tools/adr site && python3 -m http.server -d _site`
   y abrir <http://localhost:8000>.
+
+> GitHub Pages sirve el sitio públicamente. Si el repositorio vuelve a ser
+> privado, la publicación requiere un plan de pago (Team o Enterprise).
 
 ## Gobernanza de aprobaciones
 
