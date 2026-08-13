@@ -27,6 +27,30 @@ tools/adr                     CLI de gestión (bash, sin dependencias)
 - **Inmutabilidad**: un ADR aceptado no se reescribe. Si la decisión cambia,
   se crea un ADR nuevo que reemplaza al anterior y ambos quedan enlazados.
 
+## Índice de decisiones
+
+Ver [adr/README.md](adr/README.md).
+
+## Flujo de trabajo en GitHub
+
+1. **Proponer**: abrir un issue con la plantilla «Propuesta de ADR» para
+   discutir la decisión, o directamente crear una rama y ejecutar
+   `tools/adr new "<título>"`.
+2. **Redactar**: completar Contexto, Decisión y Consecuencias en el archivo
+   generado. El ADR nace con estado `propuesta`.
+3. **Revisar**: abrir un pull request. El workflow `adr-lint` valida la
+   convención y que el índice esté actualizado; la decisión se discute en la
+   revisión del PR.
+4. **Aceptar**: antes del merge, ejecutar
+   `tools/adr status <archivo> aceptada` (o `rechazada` si se documenta el
+   descarte). El merge del PR formaliza la decisión.
+5. **Evolucionar**: si más adelante la decisión cambia, usar
+   `tools/adr supersede` para crear el ADR que la reemplaza — nunca editar la
+   decisión original.
+
+El workflow `adr-index` regenera el índice automáticamente en cada push a la
+rama principal que toque `adr/`, por lo que el índice nunca queda
+desactualizado.
 ## Uso de la CLI
 
 Desde la raíz del repositorio:
@@ -51,27 +75,3 @@ tools/adr lint
 tools/adr index
 ```
 
-## Flujo de trabajo en GitHub
-
-1. **Proponer**: abrir un issue con la plantilla «Propuesta de ADR» para
-   discutir la decisión, o directamente crear una rama y ejecutar
-   `tools/adr new "<título>"`.
-2. **Redactar**: completar Contexto, Decisión y Consecuencias en el archivo
-   generado. El ADR nace con estado `propuesta`.
-3. **Revisar**: abrir un pull request. El workflow `adr-lint` valida la
-   convención y que el índice esté actualizado; la decisión se discute en la
-   revisión del PR.
-4. **Aceptar**: antes del merge, ejecutar
-   `tools/adr status <archivo> aceptada` (o `rechazada` si se documenta el
-   descarte). El merge del PR formaliza la decisión.
-5. **Evolucionar**: si más adelante la decisión cambia, usar
-   `tools/adr supersede` para crear el ADR que la reemplaza — nunca editar la
-   decisión original.
-
-El workflow `adr-index` regenera el índice automáticamente en cada push a la
-rama principal que toque `adr/`, por lo que el índice nunca queda
-desactualizado.
-
-## Índice de decisiones
-
-Ver [adr/README.md](adr/README.md).
