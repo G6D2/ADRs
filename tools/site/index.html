@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de decisiones de arquitectura</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%F0%9F%93%9C%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <header class="site">
+      <h1>Registro de decisiones de arquitectura</h1>
+      <p>Architecture Decision Records (ADRs) · <a id="repo-link" href="#">repositorio</a></p>
+    </header>
+    <a id="proponer" class="btn" href="#">Proponer un ADR</a>
+  </div>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Buscar por título o archivo…" aria-label="Buscar ADRs">
+    <div id="filtros" role="group" aria-label="Filtrar por estado"></div>
+  </div>
+
+  <ul class="adrs" id="lista"></ul>
+  <p class="vacio" id="vacio" hidden>No hay ADRs que coincidan con el filtro.</p>
+
+  <footer class="site">
+    Generado con <code>tools/adr site</code> · actualizado el <span id="generado"></span>.
+    Las decisiones se proponen y aprueban mediante pull requests; este sitio es de solo lectura.
+  </footer>
+</div>
+
+<script>
+(async () => {
+  const data = await (await fetch('adrs.json')).json();
+  const ESTADOS = ['propuesta', 'aceptada', 'rechazada', 'obsoleta', 'reemplazada'];
+
+  document.getElementById('repo-link').href = data.repo;
+  document.getElementById('proponer').href =
+    data.repo + '/issues/new?template=propuesta-adr.yml';
+  document.getElementById('generado').textContent = data.generado;
+
+  let estadoActivo = null;
+  let q = '';
+
+  const filtros = document.getElementById('filtros');
+  for (const e of ESTADOS) {
+    const n = data.adrs.filter(a => a.estado === e).length;
+    if (n === 0) continue;
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = `${e} (${n})`;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => {
+      estadoActivo = estadoActivo === e ? null : e;
+      for (const c of filtros.children)
+        c.setAttribute('aria-pressed', String(c === b && estadoActivo !== null));
+      render();
+    });
+    filtros.appendChild(b);
+  }
+
+  document.getElementById('q').addEventListener('input', ev => {
+    q = ev.target.value.trim().toLowerCase();
+    render();
+  });
+
+  function render() {
+    const lista = document.getElementById('lista');
+    lista.textContent = '';
+    const visibles = data.adrs.filter(a =>
+      (!estadoActivo || a.estado === estadoActivo) &&
+      (!q || a.titulo.toLowerCase().includes(q) || a.archivo.toLowerCase().includes(q)));
+    for (const a of visibles) {
+      const li = document.createElement('li');
+      const t = document.createElement('a');
+      t.className = 'titulo';
+      t.href = 'ver.html?adr=' + encodeURIComponent(a.archivo.replace(/\.md$/, ''));
+      t.textContent = a.titulo;
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      const badge = document.createElement('span');
+      badge.className = 'badge ' + a.estado;
+      badge.textContent = a.estado;
+      const fecha = document.createElement('span');
+      fecha.className = 'fecha';
+      fecha.textContent = a.fecha;
+      meta.append(badge, fecha);
+      li.append(t, meta);
+      lista.appendChild(li);
+    }
+    document.getElementById('vacio').hidden = visibles.length > 0;
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

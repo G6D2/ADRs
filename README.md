@@ -1,7 +1,8 @@
 # Gestión de ADRs
 
 Herramienta de gestión de **Architecture Decision Records (ADRs)** basada en
-GitHub, siguiendo los lineamientos de
+GitHub y publicada como sitio en **GitHub Pages**, siguiendo los lineamientos
+de
 [G6D2/architecture-decision-record](https://github.com/G6D2/architecture-decision-record).
 
 ## Estructura
@@ -12,7 +13,9 @@ adr/                          Registro de decisiones (un .md por decisión)
 ├── templates/plantilla.md    Plantilla (estilo Michael Nygard)
 └── *.md                      ADRs
 tools/adr                     CLI de gestión (bash, sin dependencias)
-.github/workflows/            Validación e índice automáticos
+tools/site/                   Assets del sitio de GitHub Pages
+.github/CODEOWNERS            Gobernanza: quién aprueba los PRs
+.github/workflows/            Validación, índice y despliegue del sitio
 ```
 
 ## Convenciones (según los lineamientos)
@@ -51,6 +54,7 @@ Ver [adr/README.md](adr/README.md).
 El workflow `adr-index` regenera el índice automáticamente en cada push a la
 rama principal que toque `adr/`, por lo que el índice nunca queda
 desactualizado.
+
 ## Uso de la CLI
 
 Desde la raíz del repositorio:
@@ -73,5 +77,44 @@ tools/adr lint
 
 # Regenerar el índice adr/README.md
 tools/adr index
+
+# Generar el sitio de GitHub Pages en _site/ (para probarlo localmente)
+tools/adr site
 ```
 
+## Sitio en GitHub Pages
+
+El registro se publica como sitio estático: un índice con búsqueda y filtros
+por estado, más un visor por ADR con su historial. No tiene dependencias
+externas ni backend; es de solo lectura y la gestión sigue siendo por pull
+requests.
+
+- El workflow [`adr-pages`](.github/workflows/adr-pages.yml) genera el sitio
+  con `tools/adr site` y lo despliega en cada push a `main`.
+- **Activación (una sola vez)**: en el repositorio, ir a
+  **Settings → Pages → Build and deployment → Source** y elegir
+  **GitHub Actions**. El sitio quedará en
+  `https://g6d2.github.io/ADRs/`.
+- Para probarlo localmente: `tools/adr site && python3 -m http.server -d _site`
+  y abrir <http://localhost:8000>.
+
+## Gobernanza de aprobaciones
+
+Los equipos (Back, Front, Desarrollo) proponen ADRs mediante pull requests,
+pero **solo el equipo de Producto o el administrador pueden aprobarlos**:
+
+- [`.github/CODEOWNERS`](.github/CODEOWNERS) declara a `@G6D2/producto` y a
+  `@Salterm27` como propietarios de todo el repositorio.
+- Para que GitHub lo exija, hay que crear **una sola vez** un ruleset sobre
+  `main` (Settings → Rules → Rulesets → **New branch ruleset**):
+  1. **Target branches**: `main` (o "Default branch").
+  2. Activar **Require a pull request before merging**, con
+     **Required approvals: 1** y **Require review from Code Owners**.
+  3. Recomendado: **Dismiss stale pull request approvals when new commits
+     are pushed** y **Block force pushes**.
+- Con eso, las aprobaciones de otros equipos no habilitan el merge: solo
+  cuentan las de Producto o la tuya como admin. Los demás equipos conservan
+  permiso de escritura para crear ramas y abrir PRs.
+
+> Nota: el equipo `@G6D2/producto` debe tener al menos permiso de lectura
+> sobre este repositorio para poder ser asignado como code owner.

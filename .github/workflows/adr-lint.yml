@@ -4,12 +4,12 @@ on:
   pull_request:
     paths:
       - "adr/**"
-      - "tools/adr"
+      - "tools/**"
   push:
     branches-ignore: [main]
     paths:
       - "adr/**"
-      - "tools/adr"
+      - "tools/**"
 
 jobs:
   lint:
@@ -27,3 +27,8 @@ jobs:
             echo "::error::El índice adr/README.md está desactualizado. Ejecute 'tools/adr index' y agregue el cambio al commit."
             exit 1
           fi
+
+      - name: Verificar que el sitio se genera correctamente
+        run: |
+          tools/adr site /tmp/site-check
+          python3 -c "import json; json.load(open('/tmp/site-check/adrs.json'))"

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADR</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%F0%9F%93%9C%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="migas">
+    <a href="index.html">← Índice de decisiones</a>
+    <a id="fuente" href="#" hidden>Ver fuente en GitHub</a>
+  </nav>
+  <article class="adr" id="contenido"><p class="vacio">Cargando…</p></article>
+</div>
+
+<script>
+function mdRender(md) {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const inline = s => {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, (m, c) => '<code>' + c + '</code>');
+    s = s.replace(/&lt;(https?:[^&\s]+)&gt;/g, '<a href="$1">$1</a>');
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, t, u) => {
+      if (/^[a-z0-9-]+\.md$/.test(u)) u = 'ver.html?adr=' + u.replace(/\.md$/, '');
+      return '<a href="' + u + '">' + t + '</a>';
+    });
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    return s;
+  };
+  const out = [];
+  let inList = false, para = [];
+  const flushPara = () => { if (para.length) { out.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } };
+  const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+  for (const line of md.split(/\r?\n/)) {
+    let m;
+    if ((m = line.match(/^(#{1,4})\s+(.*)/))) {
+      flushPara(); closeList();
+      const n = m[1].length;
+      out.push('<h' + n + '>' + inline(m[2]) + '</h' + n + '>');
+    } else if (/^\s*[-*]\s+/.test(line)) {
+      flushPara();
+      if (!inList) { out.push('<ul>'); inList = true; }
+      out.push('<li>' + inline(line.replace(/^\s*[-*]\s+/, '')) + '</li>');
+    } else if (/^---+\s*$/.test(line)) {
+      flushPara(); closeList(); out.push('<hr>');
+    } else if (/^\s*$/.test(line)) {
+      flushPara(); closeList();
+    } else if (inList) {
+      // Línea de continuación de un ítem de lista: se anexa al último <li>
+      out[out.length - 1] = out[out.length - 1]
+        .replace(/<\/li>$/, ' ' + inline(line.trim()) + '</li>');
+    } else {
+      para.push(line.trim());
+    }
+  }
+  flushPara(); closeList();
+  return out.join('\n');
+}
+
+(async () => {
+  const cont = document.getElementById('contenido');
+  const slug = new URLSearchParams(location.search).get('adr') || '';
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    cont.innerHTML = '<p class="vacio">ADR no especificado. Volvé al <a href="index.html">índice</a>.</p>';
+    return;
+  }
+  try {
+    const res = await fetch(slug + '.md');
+    if (!res.ok) throw new Error(res.status);
+    const md = await res.text();
+    cont.innerHTML = mdRender(md);
+    const h1 = cont.querySelector('h1');
+    if (h1) document.title = h1.textContent + ' · ADR';
+    // Resalta el estado como chip
+    for (const li of cont.querySelectorAll('li')) {
+      const m = li.textContent.match(/^Estado:\s*(propuesta|aceptada|rechazada|obsoleta|reemplazada)$/);
+      if (m) li.innerHTML = 'Estado: <span class="badge ' + m[1] + '">' + m[1] + '</span>';
+    }
+    const data = await (await fetch('adrs.json')).json();
+    const fuente = document.getElementById('fuente');
+    fuente.href = data.repo + '/blob/main/adr/' + slug + '.md';
+    fuente.hidden = false;
+  } catch (e) {
+    cont.innerHTML = '<p class="vacio">No se encontró el ADR <code>' + slug + '</code>. Volvé al <a href="index.html">índice</a>.</p>';
+  }
+})();
+</script>
+</body>
+</html>

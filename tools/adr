@@ -34,6 +34,8 @@ Comandos:
                               y enlaza ambos documentos.
   lint                        Valida que todos los ADRs cumplan la convención
                               (secciones requeridas, estado y fecha válidos).
+  site [directorio]           Genera el sitio estático para GitHub Pages
+                              (por defecto en _site/).
   help                        Muestra esta ayuda.
 
 Variables de entorno:
@@ -219,6 +221,45 @@ cmd_lint() {
   echo "lint: todos los ADRs son válidos"
 }
 
+json_escape() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
+
+link_target() { # "[título](archivo.md)" -> "archivo.md" ("—" -> "")
+  printf '%s' "$1" | sed -nE 's/.*\(([^)]+)\).*/\1/p'
+}
+
+cmd_site() {
+  local out="${1:-_site}"
+  local assets; assets="$(cd "$(dirname "$0")" && pwd)/site"
+  if [ ! -d "$assets" ]; then die "no se encuentran los assets del sitio en $assets"; fi
+  rm -rf "$out"
+  mkdir -p "$out"
+
+  local repo_url
+  repo_url=$(git remote get-url origin 2>/dev/null | sed -E 's/\.git$//' || true)
+
+  local f first=1
+  {
+    printf '{\n  "repo": "%s",\n  "generado": "%s",\n  "adrs": [\n' "$repo_url" "$(today)"
+    for f in $(adr_files); do
+      if [ $first -eq 0 ]; then printf ',\n'; fi
+      first=0
+      printf '    {"archivo": "%s", "titulo": "%s", "estado": "%s", "fecha": "%s", "reemplaza": "%s", "reemplazada_por": "%s"}' \
+        "$(basename "$f")" \
+        "$(json_escape "$(title_of "$f")")" \
+        "$(field "$f" Estado)" \
+        "$(field "$f" Fecha)" \
+        "$(link_target "$(field "$f" 'Reemplaza a')")" \
+        "$(link_target "$(field "$f" 'Reemplazada por')")"
+    done
+    printf '\n  ]\n}\n'
+  } > "$out/adrs.json"
+
+  for f in $(adr_files); do cp "$f" "$out/"; done
+  cp "$assets/index.html" "$assets/ver.html" "$assets/style.css" "$out/"
+  touch "$out/.nojekyll"
+  echo "sitio generado en $out/ ($(adr_files | wc -l) ADRs)"
+}
+
 cmd="${1:-help}"
 if [ $# -gt 0 ]; then shift; fi
 case "$cmd" in
@@ -228,6 +269,7 @@ case "$cmd" in
   status)    cmd_status "$@" ;;
   supersede) cmd_supersede "$@" ;;
   lint)      cmd_lint "$@" ;;
+  site)      cmd_site "$@" ;;
   help|-h|--help) usage ;;
   *) die "comando desconocido: $cmd (use 'adr help')" ;;
 esac

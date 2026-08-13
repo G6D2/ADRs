@@ -1,0 +1,84 @@
+:root {
+  --bg: #faf9f7;
+  --fg: #1a1a1a;
+  --muted: #6b6b6b;
+  --card: #ffffff;
+  --border: #e3e0da;
+  --accent: #0b57d0;
+  --code-bg: #efede8;
+  --propuesta-bg: #fdf3d7; --propuesta-fg: #7a5a00;
+  --aceptada-bg: #ddf2e2; --aceptada-fg: #1a6b34;
+  --rechazada-bg: #fbe0dd; --rechazada-fg: #a02c22;
+  --obsoleta-bg: #e8e6e1; --obsoleta-fg: #5c5c5c;
+  --reemplazada-bg: #e9e2f7; --reemplazada-fg: #5b3ba8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --fg: #e8e6e3;
+    --muted: #9a9891;
+    --card: #1f2124;
+    --border: #34363a;
+    --accent: #8ab4f8;
+    --code-bg: #2a2c30;
+    --propuesta-bg: #3a3110; --propuesta-fg: #e8c35a;
+    --aceptada-bg: #143321; --aceptada-fg: #6fce8e;
+    --rechazada-bg: #3d1c18; --rechazada-fg: #f0857a;
+    --obsoleta-bg: #2b2c2e; --obsoleta-fg: #a3a3a3;
+    --reemplazada-bg: #292040; --reemplazada-fg: #b9a3f0;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 56rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+header.site h1 { margin: 0 0 .25rem; font-size: 1.6rem; }
+header.site p { margin: 0; color: var(--muted); }
+.topbar { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.btn {
+  display: inline-block; padding: .45rem .9rem; border-radius: .5rem;
+  background: var(--accent); color: var(--bg); font-weight: 600; font-size: .9rem;
+}
+.btn:hover { text-decoration: none; filter: brightness(1.1); }
+.badge {
+  display: inline-block; padding: .1rem .6rem; border-radius: 999px;
+  font-size: .78rem; font-weight: 600; white-space: nowrap;
+}
+.badge.propuesta   { background: var(--propuesta-bg);   color: var(--propuesta-fg); }
+.badge.aceptada    { background: var(--aceptada-bg);    color: var(--aceptada-fg); }
+.badge.rechazada   { background: var(--rechazada-bg);   color: var(--rechazada-fg); }
+.badge.obsoleta    { background: var(--obsoleta-bg);    color: var(--obsoleta-fg); }
+.badge.reemplazada { background: var(--reemplazada-bg); color: var(--reemplazada-fg); }
+.controls { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: 1.25rem 0 1rem; }
+.controls input {
+  flex: 1 1 14rem; padding: .5rem .75rem; border-radius: .5rem;
+  border: 1px solid var(--border); background: var(--card); color: var(--fg); font: inherit;
+}
+.chip {
+  cursor: pointer; border: 1px solid var(--border); background: var(--card);
+  color: var(--fg); border-radius: 999px; padding: .25rem .75rem; font: inherit; font-size: .85rem;
+}
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+ul.adrs { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+ul.adrs li {
+  background: var(--card); border: 1px solid var(--border); border-radius: .6rem;
+  padding: .8rem 1rem; display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+}
+ul.adrs .titulo { font-weight: 600; }
+ul.adrs .meta { display: flex; gap: .75rem; align-items: baseline; white-space: nowrap; }
+ul.adrs .fecha { color: var(--muted); font-size: .85rem; }
+.vacio { color: var(--muted); padding: 2rem 0; text-align: center; }
+footer.site { margin-top: 3rem; color: var(--muted); font-size: .85rem; }
+/* Visor de ADR */
+article.adr { background: var(--card); border: 1px solid var(--border); border-radius: .75rem; padding: 1.5rem 2rem; }
+article.adr h1 { font-size: 1.5rem; margin-top: 0; }
+article.adr h2 { font-size: 1.15rem; margin-top: 1.75rem; border-bottom: 1px solid var(--border); padding-bottom: .3rem; }
+article.adr code { background: var(--code-bg); border-radius: .3rem; padding: .1rem .35rem; font-size: .9em; }
+article.adr hr { border: 0; border-top: 1px solid var(--border); }
+nav.migas { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }

@@ -1,0 +1,8 @@
+# Propietarios del código: toda modificación del repositorio (ADRs incluidos)
+# requiere la aprobación del equipo de Producto o del administrador.
+#
+# Este archivo por sí solo no bloquea nada: se hace efectivo activando en un
+# ruleset de la rama main la opción "Require review from Code Owners"
+# (ver README, sección «Gobernanza de aprobaciones»).
+
+* @G6D2/producto @Salterm27
