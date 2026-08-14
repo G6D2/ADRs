@@ -110,19 +110,22 @@ pero **solo el equipo de Producto o el administrador pueden aprobarlos**. Esto
 se apoya en tres piezas:
 
 **1. Acceso de los equipos** (Settings → Collaborators and teams → **Add
-teams**). Todos los equipos deben ser colaboradores del repositorio con
-permiso de **escritura** (`Write`):
+teams**). Todos los equipos son colaboradores del repositorio con permiso
+**Maintain** (alcanza con `Write`; `Maintain` lo incluye):
 
 | Equipo | Permiso | Para qué |
 |---|---|---|
-| `producto` | Write | Requisito de GitHub para ser code owner válido y poder aprobar. |
-| `back`, `front`, `desarrollo` | Write | Crear ramas y abrir PRs sin tener que forkear. |
+| `producto` | Maintain | Requisito de GitHub para ser code owner válido y poder aprobar. |
+| `back`, `front`, `desarrollo` | Maintain | Crear ramas y abrir PRs sin tener que forkear. |
 
-> **Importante**: GitHub exige permiso de escritura para que un code owner sea
-> válido. Mientras `@G6D2/producto` no esté agregado, esa entrada del
+> **Importante**: GitHub exige permiso de escritura como mínimo para que un
+> code owner sea válido. Si `@G6D2/producto` no está agregado, esa entrada del
 > `CODEOWNERS` se ignora en silencio y solo cuenta la aprobación de
 > `@Salterm27`. GitHub marca las entradas inválidas con un aviso al abrir el
 > archivo `CODEOWNERS` en la web.
+>
+> `Maintain` no permite saltear el ruleset ni editarlo: eso queda reservado a
+> los administradores.
 
 **2. Propietarios del código**: [`.github/CODEOWNERS`](.github/CODEOWNERS)
 declara a `@G6D2/producto` y a `@Salterm27` como propietarios de todo el
