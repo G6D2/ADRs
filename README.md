@@ -106,24 +106,36 @@ requests.
 ## Gobernanza de aprobaciones
 
 Los equipos (Back, Front, Desarrollo) proponen ADRs mediante pull requests,
-pero **solo el equipo de Producto o el administrador pueden aprobarlos**:
+pero **solo el equipo de Producto o el administrador pueden aprobarlos**. Esto
+se apoya en tres piezas:
 
-- [`.github/CODEOWNERS`](.github/CODEOWNERS) declara a `@G6D2/producto` y a
-  `@Salterm27` como propietarios de todo el repositorio.
-- Para que GitHub lo exija, hay que crear **una sola vez** un ruleset sobre
-  `main` (Settings → Rules → Rulesets → **New branch ruleset**):
-  1. **Target branches**: `main` (o "Default branch").
-  2. Activar **Require a pull request before merging**, con
-     **Required approvals: 1** y **Require review from Code Owners**.
-  3. Recomendado: **Dismiss stale pull request approvals when new commits
-     are pushed** y **Block force pushes**.
-- Con eso, las aprobaciones de otros equipos no habilitan el merge: solo
-  cuentan las de Producto o la tuya como admin. Los demás equipos conservan
-  permiso de escritura para crear ramas y abrir PRs.
+**1. Acceso de los equipos** (Settings → Collaborators and teams → **Add
+teams**). Todos los equipos deben ser colaboradores del repositorio con
+permiso de **escritura** (`Write`):
 
-> **Importante**: GitHub exige que los code owners tengan **permiso de
-> escritura** sobre el repositorio. Mientras `@G6D2/producto` no esté agregado
-> como colaborador (Settings → Collaborators and teams → Add teams), esa
-> entrada del `CODEOWNERS` se ignora y solo cuenta la aprobación de
+| Equipo | Permiso | Para qué |
+|---|---|---|
+| `producto` | Write | Requisito de GitHub para ser code owner válido y poder aprobar. |
+| `back`, `front`, `desarrollo` | Write | Crear ramas y abrir PRs sin tener que forkear. |
+
+> **Importante**: GitHub exige permiso de escritura para que un code owner sea
+> válido. Mientras `@G6D2/producto` no esté agregado, esa entrada del
+> `CODEOWNERS` se ignora en silencio y solo cuenta la aprobación de
 > `@Salterm27`. GitHub marca las entradas inválidas con un aviso al abrir el
 > archivo `CODEOWNERS` en la web.
+
+**2. Propietarios del código**: [`.github/CODEOWNERS`](.github/CODEOWNERS)
+declara a `@G6D2/producto` y a `@Salterm27` como propietarios de todo el
+repositorio.
+
+**3. Ruleset sobre `main`** (Settings → Rules → Rulesets → **New branch
+ruleset**), que es lo que hace exigible al `CODEOWNERS`:
+
+1. **Target branches**: `main` (o "Default branch").
+2. Activar **Require a pull request before merging**, con
+   **Required approvals: 1** y **Require review from Code Owners**.
+3. Recomendado: **Dismiss stale pull request approvals when new commits
+   are pushed** y **Block force pushes**.
+
+Con las tres piezas, las aprobaciones de otros equipos no habilitan el merge:
+solo cuentan las de Producto o las del administrador.
