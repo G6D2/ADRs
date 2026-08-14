@@ -121,5 +121,9 @@ pero **solo el equipo de Producto o el administrador pueden aprobarlos**:
   cuentan las de Producto o la tuya como admin. Los demás equipos conservan
   permiso de escritura para crear ramas y abrir PRs.
 
-> Nota: el equipo `@G6D2/producto` debe tener al menos permiso de lectura
-> sobre este repositorio para poder ser asignado como code owner.
+> **Importante**: GitHub exige que los code owners tengan **permiso de
+> escritura** sobre el repositorio. Mientras `@G6D2/producto` no esté agregado
+> como colaborador (Settings → Collaborators and teams → Add teams), esa
+> entrada del `CODEOWNERS` se ignora y solo cuenta la aprobación de
+> `@Salterm27`. GitHub marca las entradas inválidas con un aviso al abrir el
+> archivo `CODEOWNERS` en la web.
