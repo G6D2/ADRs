@@ -8,6 +8,7 @@ Para regenerarlo: `tools/adr index`
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
+| [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | propuesta | 2026-08-27 |
 
 Para crear un ADR nuevo: `tools/adr new "<título>"` — ver el
 [README principal](../README.md) para el flujo de trabajo completo.
