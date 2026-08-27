@@ -12,6 +12,5 @@ Para regenerarlo: `tools/adr index`
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | propuesta | 2026-08-27 |
 | [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | propuesta | 2026-08-27 |
 
-
 Para crear un ADR nuevo: `tools/adr new "<título>"` — ver el
 [README principal](../README.md) para el flujo de trabajo completo.
