@@ -1,6 +1,6 @@
 # Usar Kafka como bus de eventos
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-09-07
 - Decisores: @juanimoli (Producto), @Matiamistadi y @luccaperazzo (Back), @KevinAlajarin (DevOps), Grupo 1 (EDA)
 - Reemplaza a: —
@@ -106,3 +106,4 @@ Se hace más difícil:
 ## Historial
 
 - 2026-09-07: creación del ADR (estado: propuesta)
+- 2026-09-07: cambio de estado: propuesta → aceptada
