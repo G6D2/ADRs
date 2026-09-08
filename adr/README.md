@@ -5,6 +5,7 @@ Para regenerarlo: `tools/adr index`
 
 | ADR | Estado | Fecha |
 |-----|--------|-------|
+| [Elegir base de datos](elegir-base-de-datos.md) | propuesta | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | propuesta | 2026-08-14 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
