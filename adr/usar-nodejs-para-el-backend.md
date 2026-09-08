@@ -1,6 +1,6 @@
 # Usar NodeJS para el backend
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-08-27
 - Decisores: equipo backend
 - Reemplaza a: —
@@ -59,3 +59,4 @@ Se hace más difícil:
 ## Historial
 
 - 2026-08-27: creación del ADR (estado: propuesta)
+- 2026-09-07: cambio de estado: propuesta → aceptada
