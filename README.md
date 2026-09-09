@@ -5,6 +5,8 @@ GitHub y publicada como sitio en **GitHub Pages**, siguiendo los lineamientos
 de
 [G6D2/architecture-decision-record](https://github.com/G6D2/architecture-decision-record).
 
+📖 **Sitio publicado: <https://g6d2.github.io/ADRs/>**
+
 ## Estructura
 
 ```
@@ -32,7 +34,8 @@ tools/site/                   Assets del sitio de GitHub Pages
 
 ## Índice de decisiones
 
-Ver [adr/README.md](adr/README.md).
+Ver el [sitio publicado](https://g6d2.github.io/ADRs/) o el índice en el
+repositorio: [adr/README.md](adr/README.md).
 
 ## Flujo de trabajo en GitHub
 
@@ -89,32 +92,53 @@ por estado, más un visor por ADR con su historial. No tiene dependencias
 externas ni backend; es de solo lectura y la gestión sigue siendo por pull
 requests.
 
+- Está publicado en <https://g6d2.github.io/ADRs/>.
 - El workflow [`adr-pages`](.github/workflows/adr-pages.yml) genera el sitio
-  con `tools/adr site` y lo despliega en cada push a `main`.
-- **Activación (una sola vez)**: en el repositorio, ir a
-  **Settings → Pages → Build and deployment → Source** y elegir
-  **GitHub Actions**. El sitio quedará en
-  `https://g6d2.github.io/ADRs/`.
+  con `tools/adr site` y lo despliega en cada push a `main`, por lo que el
+  sitio siempre refleja el estado del registro. También puede lanzarse a mano
+  desde la pestaña Actions (`workflow_dispatch`).
 - Para probarlo localmente: `tools/adr site && python3 -m http.server -d _site`
   y abrir <http://localhost:8000>.
+
+> GitHub Pages sirve el sitio públicamente. Si el repositorio vuelve a ser
+> privado, la publicación requiere un plan de pago (Team o Enterprise).
 
 ## Gobernanza de aprobaciones
 
 Los equipos (Back, Front, Desarrollo) proponen ADRs mediante pull requests,
-pero **solo el equipo de Producto o el administrador pueden aprobarlos**:
+pero **solo el equipo de Producto o el administrador pueden aprobarlos**. Esto
+se apoya en tres piezas:
 
-- [`.github/CODEOWNERS`](.github/CODEOWNERS) declara a `@G6D2/producto` y a
-  `@Salterm27` como propietarios de todo el repositorio.
-- Para que GitHub lo exija, hay que crear **una sola vez** un ruleset sobre
-  `main` (Settings → Rules → Rulesets → **New branch ruleset**):
-  1. **Target branches**: `main` (o "Default branch").
-  2. Activar **Require a pull request before merging**, con
-     **Required approvals: 1** y **Require review from Code Owners**.
-  3. Recomendado: **Dismiss stale pull request approvals when new commits
-     are pushed** y **Block force pushes**.
-- Con eso, las aprobaciones de otros equipos no habilitan el merge: solo
-  cuentan las de Producto o la tuya como admin. Los demás equipos conservan
-  permiso de escritura para crear ramas y abrir PRs.
+**1. Acceso de los equipos** (Settings → Collaborators and teams → **Add
+teams**). Todos los equipos son colaboradores del repositorio con permiso
+**Maintain** (alcanza con `Write`; `Maintain` lo incluye):
 
-> Nota: el equipo `@G6D2/producto` debe tener al menos permiso de lectura
-> sobre este repositorio para poder ser asignado como code owner.
+| Equipo | Permiso | Para qué |
+|---|---|---|
+| `producto` | Maintain | Requisito de GitHub para ser code owner válido y poder aprobar. |
+| `back`, `front`, `desarrollo` | Maintain | Crear ramas y abrir PRs sin tener que forkear. |
+
+> **Importante**: GitHub exige permiso de escritura como mínimo para que un
+> code owner sea válido. Si `@G6D2/producto` no está agregado, esa entrada del
+> `CODEOWNERS` se ignora en silencio y solo cuenta la aprobación de
+> `@Salterm27`. GitHub marca las entradas inválidas con un aviso al abrir el
+> archivo `CODEOWNERS` en la web.
+>
+> `Maintain` no permite saltear el ruleset ni editarlo: eso queda reservado a
+> los administradores.
+
+**2. Propietarios del código**: [`.github/CODEOWNERS`](.github/CODEOWNERS)
+declara a `@G6D2/producto` y a `@Salterm27` como propietarios de todo el
+repositorio.
+
+**3. Ruleset sobre `main`** (Settings → Rules → Rulesets → **New branch
+ruleset**), que es lo que hace exigible al `CODEOWNERS`:
+
+1. **Target branches**: `main` (o "Default branch").
+2. Activar **Require a pull request before merging**, con
+   **Required approvals: 1** y **Require review from Code Owners**.
+3. Recomendado: **Dismiss stale pull request approvals when new commits
+   are pushed** y **Block force pushes**.
+
+Con las tres piezas, las aprobaciones de otros equipos no habilitan el merge:
+solo cuentan las de Producto o las del administrador.
