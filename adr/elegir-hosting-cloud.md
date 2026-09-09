@@ -1,6 +1,6 @@
 # Elegir hosting cloud
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-08-14
 - Decisores: @valenfiumana, @juanimoli, @Salterm27
 - Reemplaza a: —
@@ -46,3 +46,4 @@ Se hace más difícil:
 ## Historial
 
 - 2026-08-14: creación del ADR (estado: propuesta)
+- 2026-09-07: cambio de estado: propuesta → aceptada
