@@ -100,3 +100,4 @@ Se hace más difícil:
 
 - 2026-09-07: creación del ADR (estado: propuesta)
 - 2026-09-07: cambio de estado: propuesta → aceptada
+
