@@ -1,6 +1,6 @@
 # Elegir base de datos
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-09-07
 - Decisores: @valenfiumana, @juanimoli, @Salterm27 (Producto), @Matiamistadi (Back)
 - Reemplaza a: —
@@ -99,3 +99,5 @@ Se hace más difícil:
 ## Historial
 
 - 2026-09-07: creación del ADR (estado: propuesta)
+- 2026-09-07: cambio de estado: propuesta → aceptada
+
