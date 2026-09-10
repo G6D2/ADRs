@@ -1,6 +1,6 @@
 # Modelar incidentes con identificador propio
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-09-09
 - Decisores: @juanimoli, @Matiamistadi
 - Reemplaza a: —
@@ -15,7 +15,7 @@ El módulo de Emergencias no detecta cuándo múltiples reportes de distintos ci
 
 ## Decisión
 
-- Vamos a introducir `incidentId` como concepto nuevo e independiente de `correlationId`, con `Incident` como agregado propio (tabla `incidents`, migración V6), en vez de reutilizar `correlationId` para agrupar emergencias.
+- Vamos a introducir `incidentId` como concepto nuevo e independiente de `correlationId`, con `Incident` como agregado propio (tabla `incidents`, en una migración nueva cuyo número se define al implementarla), en vez de reutilizar `correlationId` para agrupar emergencias.
 - Vamos a definir `correlationId` como igual a `emergencyId` en el momento de creación de la emergencia, persistido en una columna propia — sin generarlo por separado — para cumplir el contrato ya asumido por el Roadmap y por Analítica.
 - Vamos a agregar `incident_id` como columna nullable/FK en `emergencies`, que se completa cuando el detector de incidentes determina que la emergencia pertenece a un incidente.
 - Vamos a limitar el alcance del Hito 1 a que un `Incident` solo pueda crecer (sumar emergencias); la fusión o división de incidentes queda fuera de alcance.
@@ -44,3 +44,4 @@ Se hace más difícil:
 ## Historial
 
 - 2026-09-09: creación del ADR (estado: propuesta), formalizando la decisión tomada en G6D2/ADRs#10.
+- 2026-09-10: cambio de estado: propuesta → aceptada
