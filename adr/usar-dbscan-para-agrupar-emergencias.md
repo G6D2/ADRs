@@ -1,6 +1,6 @@
 # Usar DBSCAN para agrupar emergencias
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-09-09
 - Decisores: @juanimoli, @Matiamistadi
 - Reemplaza a: —
@@ -50,3 +50,4 @@ Se hace más difícil:
 ## Historial
 
 - 2026-09-09: creación del ADR (estado: propuesta), formalizando la decisión tomada en G6D2/ADRs#10.
+- 2026-09-10: cambio de estado: propuesta → aceptada
