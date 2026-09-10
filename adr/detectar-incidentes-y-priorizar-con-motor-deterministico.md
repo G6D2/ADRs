@@ -17,11 +17,12 @@ Hoy no existe ningún mecanismo de priorización automática: `severity` es un `
 
 ## Decisión
 
-- Vamos a definir un contrato `IncidentDetectionStrategy` con dos implementaciones que solo deciden membresía, nunca score ni prioridad: `RuleBasedGrouper` (estrategia base, siempre disponible: mismo `emergencyType` + ventana temporal configurable + Haversine < X + mínimo de ciudadanos únicos) y `DbscanGrouper` (estrategia primaria de ML, ver el ADR de IA/ML).
+- Vamos a definir un contrato `IncidentDetectionStrategy` con dos implementaciones que solo deciden membresía, nunca score ni prioridad: `RuleBasedGrouper` (estrategia base, siempre disponible: mismo `emergencyType` + ventana temporal configurable + Haversine < X + mínimo de ciudadanos únicos) y `DbscanGrouper` (estrategia primaria de ML a nivel de diseño, ver el ADR de IA/ML).
 - Vamos a que un Risk Engine determinístico sea el único componente que calcule `incidentPriority`, a partir del `Incident` ya agrupado (cantidad de reportes, usuarios únicos, cercanía, recencia, severidad), y que garantice `priority = max(priorityIndividual, incidentPriority)` — ninguna señal de agrupación o de IA puede reducir una prioridad individual ya establecida.
 - Vamos a distinguir explícitamente falla técnica de resultado válido en la estrategia de agrupación: si `DbscanGrouper` falla técnicamente (excepción, timeout, dependencia no disponible), se usa `RuleBasedGrouper` como fallback; si `DbscanGrouper` corre bien y no encuentra ningún cluster, no se fuerza el fallback — es un resultado válido del algoritmo.
-- Vamos a correr la detección dentro del mismo proceso del backend, como job periódico (micro-batch), reutilizando el patrón ya existente en `src/security/location-retention.js` — sin microservicio nuevo ni Kafka Streams para esta entrega.
-- Vamos a resolver, como prerrequisito técnico antes de implementar lo anterior: (a) la persistencia de `emergencyType` (hoy se pierde entre el controller y el repository) y (b) la normalización y validación server-side de `severity` a una escala ordinal (`LOW < MEDIUM < HIGH < CRITICAL` o equivalente) con CHECK en base — sin esto, `max()` no tiene un resultado bien definido.
+- Vamos a correr la detección dentro del mismo proceso del backend, como job periódico cada 60 segundos, reutilizando el patrón ya existente en `src/security/location-retention.js`, controlable con la variable de entorno `INCIDENT_DETECTION_ENABLED` para apagarlo sin desplegar — sin microservicio nuevo ni Kafka Streams para esta entrega.
+- Vamos a invertir el orden de implementación respecto al orden de diseño: `RuleBasedGrouper` se construye primero, en el Hito 1 (24/09), con estos valores de arranque para la demo — de entorno, no calibrados, se ajustan con datos sintéticos en Sprint 3 — `INCIDENT_RADIUS_M=300`, `INCIDENT_WINDOW_MIN=15`, `INCIDENT_MIN_CITIZENS=2`. `DbscanGrouper` se implementa recién en Sprint 3-4, sobre el mismo contrato, con demo sobre datos sintéticos — es cuando la cátedra evalúa el componente de IA en la entrega integrada.
+- Vamos a resolver, como prerrequisito técnico antes de implementar lo anterior: (a) la persistencia de `emergencyType` con un enum cerrado de 4 tipos y CHECK en base (hoy se pierde entre el controller y el repository), y (b) la normalización y validación server-side de `severity` a una escala ordinal en español y mayúsculas — `BAJA < MEDIA < ALTA < CRITICA` — con CHECK en base y valor por defecto calculado por tipo en lugar de aceptar el que mande el cliente; la misma convención de nomenclatura aplica al estado de la emergencia (`PENDIENTE`, `VALIDADA`, ...). Sin esta normalización, `max()` no tiene un resultado bien definido.
 
 ## Alternativas consideradas
 
@@ -45,6 +46,7 @@ Se hace más difícil:
 - Mantener dos implementaciones de agrupación (`RuleBasedGrouper` y `DbscanGrouper`) y su contrato de fallback.
 - Calibrar los umbrales/pesos de `RuleBasedGrouper`, que siguen siendo manuales.
 - El job corre sobre datos descifrados en memoria — costo de CPU que hoy no existe, aunque acotado a la escala de esta cursada.
+- Demostrar `DbscanGrouper` en Sprint 3-4 con datos sintéticos: hay que dejar explícito en la demo que esos datos no representan patrones reales de la ciudad, solo el mecanismo del algoritmo.
 
 ## Historial
 
