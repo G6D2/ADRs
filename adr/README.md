@@ -5,6 +5,7 @@ Para regenerarlo: `tools/adr index`
 
 | ADR | Estado | Fecha |
 |-----|--------|-------|
+| [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
