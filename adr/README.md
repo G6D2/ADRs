@@ -5,7 +5,7 @@ Para regenerarlo: `tools/adr index`
 
 | ADR | Estado | Fecha |
 |-----|--------|-------|
-| [Actualización de la Arquitectura Frontend: Next.js, App Router, BFF y Gestión de Estado](actualizar-arquitectura-frontend.md) | propuesta | 2026-09-22 |
+| [Adoptar Next.js con App Router y un BFF en el frontend](actualizar-arquitectura-frontend.md) | propuesta | 2026-09-22 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
@@ -16,7 +16,7 @@ Para regenerarlo: `tools/adr index`
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
 | [Usar Kafka como bus de eventos](usar-kafka-como-bus-de-eventos.md) | aceptada | 2026-09-07 |
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | aceptada | 2026-08-27 |
-| [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | aceptada | 2026-08-27 |
+| [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | reemplazada | 2026-08-27 |
 
 Para crear un ADR nuevo: `tools/adr new "<título>"` — ver el
 [README principal](../README.md) para el flujo de trabajo completo.
