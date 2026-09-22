@@ -103,8 +103,32 @@ Se hace más difícil:
 - La operación del broker queda fuera de nuestro control: un corte del Grupo 1
   se vuelve un corte nuestro.
 
+## Estado actual (Hito 1)
+
+Para evitar interpretaciones erróneas cuando se presenta esta ADR como si ya estuviera implementada: la mayoría de la "Decisión" es todavía plan futuro. Lo que hoy tiene código es:
+
+| Ítem de la decisión | Estado real en el código |
+|---|---|
+| **Abstracción `EventBus`** | ❌ No existe. Los publishers actuales (`src/services/kafka.service.js`, `src/services/outbox-publisher.js`) hablan directo con `kafkajs`. Los controllers reciben un `kafkaService` inyectado, no un `EventBus`. |
+| **Nombres de tópico `com.citypass.<namespace>.<EventType>`** | ❌ Los tópicos actuales están en minúsculas y con puntos (`emergencias.boton-panico`, `emergencias.estado-actualizado`, `emergencias.cerrada`). Renombrado pendiente para cuando el gateway esté disponible. |
+| **Envelope con `metadata` sellado por el gateway** | ❌ Hoy se envía la entidad cruda; `eventId` y `correlationId` van en la raíz, no en `metadata`. |
+| **OAuth 2.0 client credentials contra IdP del Grupo 2** | ❌ No hay cliente OAuth implementado. |
+| **Publicación confiable con outbox transaccional** | ✅ Implementado: `outbox_events` + `outbox-publisher.js` con poll de 5 s. |
+| **Deduplicación por `metadata.eventId`** | ⚠️ Parcial: la tabla de eventos procesados está prevista pero no hay consumer que la necesite todavía. |
+| **`KAFKA_ENABLED=false` en Render mientras no haya bus** | ✅ Configurado en `render.yaml`; los eventos quedan en `outbox_events` con `status='PENDING'`. |
+
+### Testing de eventos
+
+- **Unit tests:** mockean `kafkajs` directamente (`src/tests/kafka.service.test.js` con `jest.fn().mockImplementation`) o inyectan un `mockKafkaService` en los controllers (`auth-local.test.js`, `panic-button.test.js`, `user.test.js`).
+- **Tests de integración del backend:** hoy usan un Postgres real (servicio `postgres:15-alpine` en el runner de GitHub Actions) pero **no** un broker Kafka real. La rama de código con Kafka activo está apagada por defecto en tests.
+- **Pruebas manuales contra Kafka real:** disponibles en local vía `docker-compose.yml` (Kafka + Zookeeper). No corren en CI.
+- **Contra el event gateway del Grupo 1:** ninguna prueba hoy — bloqueado hasta que el gateway esté disponible y el namespace de Emergencias esté confirmado.
+
+Cuando se responda a "¿cómo testean los eventos?" en la presentación, decir: **unit tests con `kafkajs` mockeado y `mockKafkaService`; broker Kafka real solo disponible en local con `docker-compose`; sin tests contra el gateway del Grupo 1 todavía**.
+
 ## Historial
 
 - 2026-09-07: creación del ADR (estado: propuesta)
 - 2026-09-07: cambio de estado: propuesta → aceptada
+- 2026-09-21: agregada sección "Estado actual (Hito 1)" para explicitar qué está implementado vs. planificado (hallazgo #18)
 
