@@ -4,7 +4,7 @@
 - Fecha: 2026-08-27
 - Decisores: equipo
 - Reemplaza a: —
-- Reemplazada por: —
+- Reemplazada por: actualizar-arquitectura-frontend.md
 
 Propuesto en el issue [#5](https://github.com/G6D2/ADRs/issues/5).
 
