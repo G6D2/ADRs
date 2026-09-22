@@ -5,7 +5,7 @@ Para regenerarlo: `tools/adr index`
 
 | ADR | Estado | Fecha |
 |-----|--------|-------|
-| [Actualización de la Arquitectura Frontend: Next.js, App Router, BFF y Gestión de Estado](actualizar-arquitectura-frontend.md) | en curso | 2026-09-22 |
+| [Actualización de la Arquitectura Frontend: Next.js, App Router, BFF y Gestión de Estado](actualizar-arquitectura-frontend.md) | propuesta | 2026-09-22 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
