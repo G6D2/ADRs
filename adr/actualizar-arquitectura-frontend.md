@@ -1,6 +1,6 @@
 # Adoptar Next.js con App Router y un BFF en el frontend
 
-- Estado: aceptada
+- Estado: propuesta
 - Fecha: 2026-09-22
 - Decisores: equipo, Producto
 - Reemplaza a: [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md)
@@ -80,4 +80,3 @@ Decidimos explícitamente no instalar Redux, Zustand ni herramientas similares p
 ## Historial
 
 - 2026-09-22: creación del ADR (estado: propuesta)
-- 2026-09-22: cambio de estado: propuesta → aceptada
