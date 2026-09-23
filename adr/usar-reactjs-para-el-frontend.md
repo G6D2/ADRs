@@ -1,10 +1,10 @@
 # Usar ReactJS para el frontend
 
-- Estado: aceptada
+- Estado: reemplazada
 - Fecha: 2026-08-27
 - Decisores: equipo
 - Reemplaza a: —
-- Reemplazada por: —
+- Reemplazada por: [Adoptar Next.js con App Router y un BFF en el frontend](actualizar-arquitectura-frontend.md)
 
 Propuesto en el issue [#5](https://github.com/G6D2/ADRs/issues/5).
 
@@ -64,3 +64,4 @@ Se hace más difícil:
 
 - 2026-08-27: creación del ADR (estado: propuesta)
 - 2026-09-07: cambio de estado: propuesta → aceptada
+- 2026-09-22: aceptada → reemplazada por [Adoptar Next.js con App Router y un BFF en el frontend](actualizar-arquitectura-frontend.md)
