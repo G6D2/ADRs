@@ -16,6 +16,7 @@ Para regenerarlo: `tools/adr index`
 | [Usar Kafka como bus de eventos](usar-kafka-como-bus-de-eventos.md) | aceptada | 2026-09-07 |
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | aceptada | 2026-08-27 |
 | [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | aceptada | 2026-08-27 |
+| [Usar SonarCloud como análisis estático complementario](usar-sonarcloud-como-analisis-complementario.md) | propuesta | 2026-09-24 |
 
 Para crear un ADR nuevo: `tools/adr new "<título>"` — ver el
 [README principal](../README.md) para el flujo de trabajo completo.
