@@ -19,9 +19,13 @@ correr el pipeline.
 
 Queremos una capa complementaria de análisis estático que se integre con
 GitHub Actions y lea los reportes de cobertura de Jest y Vitest. El
-costo es cero mientras los **proyectos en SonarCloud** sean públicos
-(visibilidad en SonarCloud, no en GitHub), aunque los repos de código
-sean privados.
+costo es cero en nuestro escenario por el **plan Free de SonarQube
+Cloud**: desde el anuncio de diciembre de 2024, cubre proyectos
+privados hasta **50k líneas de código** y **5 usuarios** por
+organización. Nuestros dos proyectos juntos suman alrededor de 5.300
+líneas en el scope analizado, muy por debajo del tope, así que corren
+gratis estando privados. Hacerlos públicos **no cambia el costo**: solo
+cambia quién puede verlos sin cuenta.
 
 ## Decisión
 
@@ -29,14 +33,20 @@ sean privados.
   herramienta de análisis estático complementaria a los tests.
 - Vamos a crear **dos proyectos** en la organización `g6d2` (región EU,
   dominio `sonarcloud.io`): `G6D2_emergencias-backend` y `G6D2_frontend`.
-  Ambos quedan con **visibilidad pública en SonarCloud** para que los
-  profes puedan abrirlos sin cuenta ni invitación — esto es independiente
-  de que los repos de GitHub sigan siendo privados: SonarCloud ofrece
-  análisis gratis mientras el proyecto Sonar sea público, no exige repo
-  público. (Nota operativa: hoy los dos proyectos están creados en
-  SonarCloud pero con visibilidad "private"; falta pasarlos a "public"
-  desde Administration → Permissions. Mientras no se haga, el acceso
-  anónimo devuelve "Project doesn't exist".)
+  Hoy ambos están **privados en SonarCloud** y el análisis corre igual,
+  cubierto por el Free plan descripto en el contexto. **No decidimos
+  acá** si los pasamos a público: el 2026-10-09 el equipo acordó no
+  abrir el código y hacer el proyecto público en SonarCloud expone
+  contenido del código al mundo. La decisión queda pendiente, con tres
+  opciones:
+    - a) **Mantener privado** y mostrar el panel durante la demo con
+      cuenta propia.
+    - b) **Pasar a público** sabiendo que el código queda visible para
+      cualquiera, no sólo las métricas.
+    - c) **Invitar nominalmente a los profes** aprovechando el cupo
+      Free de 5 usuarios por organización.
+  La opción se discute por separado; mientras tanto, el acceso anónimo
+  devuelve "Project doesn't exist", que es el estado esperado.
 - Vamos a agregar un **step de SonarCloud al final del job `lint-and-test`**
   en ambos workflows de CI, con `continue-on-error: true`, y a alimentarle
   el reporte `lcov` que ya generan Jest y Vitest.
@@ -70,7 +80,7 @@ sean privados.
 
 | Opción | Pros | Contras |
 |---|---|---|
-| **SonarCloud (SaaS)** | Gratis mientras los proyectos SonarCloud sean públicos, incluso con repo GitHub privado; integración nativa con GitHub PRs; sin infraestructura que mantener; consume `lcov` de Jest y Vitest sin adaptadores. | Dependencia de servicio externo. Requiere el secret `SONAR_TOKEN`. Como no es gate, un rojo se puede ignorar. |
+| **SonarCloud (SaaS)** | Free plan cubre proyectos privados ≤50k LOC y 5 usuarios por org (anunciado 12/2024); nuestros ~5.300 LOC entran sin forzar la visibilidad del proyecto. Integración nativa con GitHub PRs, sin infraestructura, consume `lcov` de Jest y Vitest sin adaptadores. | Dependencia de servicio externo. Requiere el secret `SONAR_TOKEN`. Como no es gate, un rojo se puede ignorar. Para que fuese gate real haría falta `sonar.qualitygate.wait=true` **y** branch protection — ninguna de las dos está hoy. |
 | SonarQube self-hosted | Control total sobre reglas y datos. Sin límites de análisis. | Hay que hostear, mantener y actualizar un servidor. Fuera del alcance de un equipo junior con presupuesto cero. |
 | Codecov | Muy focalizado en cobertura, buen UI para diffs. | Solo cobertura: no cubre code smells, complejidad ni vulnerabilities. |
 | CodeClimate | Similar a Sonar en features. | Menos difundido en la cátedra; onboarding adicional para el equipo. |
@@ -80,15 +90,22 @@ sean privados.
 
 Se hace más fácil:
 
-- Ver un panel externo de calidad y cobertura sin correr el pipeline
-  (una vez que los proyectos pasen a visibilidad pública en SonarCloud).
+- Ver un panel externo de calidad y cobertura sin correr el pipeline,
+  accesible al equipo con cuenta propia. El acceso de los profes
+  depende de qué opción tomemos sobre visibilidad (ver Decisión).
 - Detectar duplicación, complejidad alta y code smells que ESLint no
   reporta, al menos en las partes del código cubiertas por el scope de
   Sonar (todo el back; `lib` y `app/lib` del front).
 - Justificar la dimensión de calidad de la rúbrica con métricas
   independientes del propio equipo.
-- Sumar Sonar como gate bloqueante en el futuro sin cambiar de herramienta:
-  bastaría con quitar `continue-on-error: true` del step.
+- Sumar Sonar como gate bloqueante en el futuro sin cambiar de herramienta.
+  Para hacerlo real haría falta todo esto junto, no sólo lo primero:
+  (a) quitar `continue-on-error: true` del step,
+  (b) hacer que el step espere el Quality Gate con
+  `sonar.qualitygate.wait=true` (hoy el scan arranca y termina sin
+  esperar el veredicto remoto), y
+  (c) tener branch protection — en plan free privado no se puede, así
+  que el gate seguiría siendo "por acuerdo" como describe el ADR CI/CD.
 
 Se hace más difícil:
 
@@ -123,3 +140,15 @@ Se hace más difícil:
   anotado) y se reemplaza por la práctica real; se diferencia el 80%
   interno del 60% de la cátedra; se registra la deuda de corregir el
   comentario del workflow sobre "repo público". Pasa a aceptada.
+- 2026-10-20: ajustes al review del PR #24 — se corrige la explicación
+  del costo: el Free plan de SonarQube Cloud cubre proyectos privados
+  hasta 50k LOC y 5 usuarios por org (anuncio 12/2024), y nuestros
+  ~5.300 LOC entran sin necesidad de hacer el proyecto público; hacer
+  público el proyecto Sonar expone el código y choca con el acuerdo del
+  2026-10-09 de no abrir el código, así que la visibilidad en SonarCloud
+  queda **pendiente** con tres opciones registradas (privado + demo con
+  cuenta, público asumiendo que se ve el código, o invitar nominalmente
+  a los profes con el cupo Free de 5 users); se precisa que para que
+  Sonar sea gate real no alcanza con quitar `continue-on-error`: hace
+  falta además `sonar.qualitygate.wait=true` y branch protection, lo
+  cual el plan free privado tampoco permite.
