@@ -20,8 +20,14 @@ mecanismo manual de failover al sitio de backup.
 Además, los repos son **privados en plan free de GitHub**, lo que implica
 que **no podemos aplicar branch protection** desde la UI o la API (la API
 de rulesets devuelve 403 en ese plan). El gate de calidad sobre `main`
-tiene que vivir por acuerdo del equipo (CODEOWNERS + revisión manual del
-PM), no por una regla técnica forzada por la plataforma.
+tiene que vivir por acuerdo del equipo + revisión manual del PM, no por
+una regla técnica forzada por la plataforma. CODEOWNERS tampoco está
+uniformemente desplegado: `emergencias-backend` tiene
+`.github/CODEOWNERS` con `* @Salterm27` (el comentario dice "aprobación
+del PM" aunque el owner es el Scrum Master, inconsistencia a corregir),
+y `Frontend` no tiene archivo CODEOWNERS. Mientras esto no se
+uniformice, el gate real es social: PR → aprobación explícita del PM
+antes del merge.
 
 El equipo es junior en DevOps, el TPO tiene presupuesto cero y ya usamos
 GitHub para código, issues, PRs y CODEOWNERS. Cualquier plataforma externa
@@ -75,8 +81,10 @@ implicaría alta y mantenimiento adicionales.
   cátedra pide 60%. El umbral se evalúa dentro del test runner y si falla
   rompe el job de tests, así que CI queda rojo. Lo que **no** hacemos es
   trabar el merge con branch protection: como los repos son privados en
-  plan free, el merge se bloquea por acuerdo del PM (CODEOWNERS +
-  revisión manual), no por una regla técnica forzada por GitHub.
+  plan free, el merge se bloquea **por acuerdo** (aprobación explícita
+  del PM en el PR), no por una regla técnica forzada por GitHub.
+  CODEOWNERS ayuda sólo donde existe hoy (back `* @Salterm27`; front sin
+  archivo), así que el gate operativo es el visto bueno del PM.
 - Vamos a mantener un job `notify-failure` en cada workflow de CI y CD
   que envíe un email al equipo cuando cualquier job falla.
 - Vamos a correr **SonarCloud** como step del job de tests (ambos repos,
@@ -99,8 +107,9 @@ implicaría alta y mantenimiento adicionales.
 Se hace más fácil:
 
 - Ver el estado de calidad de cada PR sin salir de GitHub.
-- Dejar que el PM vete el merge en PRs con CI rojo o cobertura baja, apoyado
-  por CODEOWNERS (gate por acuerdo, no por branch protection).
+- Dejar que el PM vete el merge en PRs con CI rojo o cobertura baja (gate
+  por acuerdo del equipo, no por branch protection; CODEOWNERS apoya sólo
+  donde el archivo existe — hoy en el back).
 - Deployar a Render de forma reproducible: siempre el SHA aprobado por CI,
   disparando el CD vía `workflow_run` sobre `main`.
 - Correr migraciones Flyway contra la base productiva en el mismo pipeline,
@@ -113,12 +122,13 @@ Se hace más fácil:
 Se hace más difícil:
 
 - Que las migraciones Flyway corran contra prod es el paso más riesgoso: un
-  cambio malo en `src/db/migrations` llega a la base real apenas CI pasa.
+  cambio malo en `db/migrations` llega a la base real apenas CI pasa.
   Mitigación: revisión obligatoria del PM en PRs que toquen migraciones +
   Flyway como motor idempotente y transaccional.
 - Como no hay branch protection técnica, un merge sin aprobación del PM
   es físicamente posible: depende de disciplina del equipo. Mitigación:
-  CODEOWNERS + checklist explícito en el flujo de trabajo (`feedback-no-push`).
+  aprobación explícita del PM en cada PR y CODEOWNERS donde esté presente
+  (hoy sólo en el back). Falta uniformar CODEOWNERS en el front.
 - Toda la línea de build depende de la disponibilidad de GitHub Actions:
   un incidente de la plataforma frena los deploys.
 - Los minutos gratis son finitos: si la suite crece mucho o se hacen muchos
@@ -138,3 +148,10 @@ Se hace más difícil:
   lint/build/tests son steps de un solo job y que el back no tiene build;
   se diferencia el 80% interno del 60% de la cátedra; se marca que Sonar
   ya está corriendo. Pasa a aceptada.
+- 2026-10-20: ajustes al review del PR #23 — se refleja el estado real
+  de CODEOWNERS (back tiene `.github/CODEOWNERS` con `* @Salterm27` y un
+  comentario que menciona al PM; front no tiene archivo), por lo que el
+  gate operativo es la aprobación explícita del PM; se corrige la ruta
+  de migraciones a `db/migrations` (no `src/db/migrations`); se saca la
+  referencia a `feedback-no-push`, que no existe como artefacto en los
+  repos ni en el doc de flujo de trabajo.
