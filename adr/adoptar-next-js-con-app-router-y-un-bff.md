@@ -1,6 +1,6 @@
-# Adoptar Next.js con App Router y un BFF en el frontend
+# Adoptar Next.js con App Router y un BFF
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-09-22
 - Decisores: equipo, Producto
 - Reemplaza a: [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md)
@@ -26,7 +26,7 @@ Vamos a actualizar la arquitectura del frontend adoptando **Next.js (App Router)
 ### 1. ¿Por qué elegimos un BFF (Backend For Frontend)?
 En lugar de que el navegador hable directo con el backend Express o con servicios externos, **todas las peticiones pasan primero por endpoints de Next.js (`/api/*`)**. Elegimos este patrón por cinco razones concretas:
 
-- **Seguridad total de sesiones (Cookies `httpOnly`):** El BFF recibe las credenciales, consulta al backend y guarda el token JWT en una cookie protegida (`httpOnly`, `sameSite: lax`, `secure`). **El código JavaScript del navegador jamás tiene acceso al token**, eliminando de raíz el riesgo de robo de credenciales por XSS.
+- **Seguridad de sesiones (Cookies `httpOnly`):** El BFF recibe las credenciales, consulta al backend y guarda el token JWT en una cookie protegida (`httpOnly`, `sameSite: lax`, `secure`). **El código JavaScript del navegador jamás tiene acceso al token**, reduciendo drásticamente el riesgo de robo o exfiltración de credenciales por XSS (si bien un ataque de XSS aún podría realizar peticiones autenticadas valiéndose de la sesión activa).
 - **Absorber el Cold Start de Render:** El BFF (`lib/backend-fetch.js`) intercepta los errores `502`, `503` y `504` y reintenta la conexión automáticamente hasta 6 veces con pausas de 4 segundos. Este ciclo de 24 segundos cubre la gran mayoría de los arranques en frío. Para los casos donde el servidor demora más en responder, el indicador de espera (`backendWaitingStore`, que detecta esperas mayores a 3 segundos) cubre el resto informando al usuario en pantalla de manera transparente y sin disparar pantallas de error.
 - **Preparación para idempotencia (`Idempotency-Key`):** El BFF genera y propaga un identificador único en el encabezado `Idempotency-Key` para llamadas de mutación (`POST` y `PATCH`). Sin embargo, **el backend de Express todavía no honra este encabezado (deuda técnica registrada)**. Mientras tanto, el reintento automático solo se garantiza seguro para métodos de consulta (`GET`); para `POST`/`PATCH`, el riesgo de duplicación ante un `504` o corte de conexión luego de procesar la petición sigue existiendo hasta que el backend implemente el almacenamiento y chequeo de claves.
 - **Control de servicios externos y geocodificación:** Para la geocodificación inversa (`/api/geocode`, `lib/geocode-server.js`), el BFF centraliza las llamadas utilizando **BigDataCloud como proveedor primario** y **Nominatim (OpenStreetMap) como respaldo**. Dispone de una caché en memoria de 24 horas (`CACHE_TTL_MS`) y una cola de peticiones a 1 req/s aplicada exclusivamente a Nominatim para respetar sus términos de uso. De este modo, el navegador no expone claves ni sufre bloqueos de IP o problemas de CORS.
@@ -80,3 +80,4 @@ Decidimos explícitamente no instalar Redux, Zustand ni herramientas similares p
 ## Historial
 
 - 2026-09-22: creación del ADR (estado: propuesta)
+- 2026-10-21: cambio de estado: propuesta → aceptada
