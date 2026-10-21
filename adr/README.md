@@ -5,6 +5,7 @@ Para regenerarlo: `tools/adr index`
 
 | ADR | Estado | Fecha |
 |-----|--------|-------|
+| [Consumir eventos externos con un listener y mappers por origen](consumir-eventos-externos-con-un-listener-y-mappers-por-origen.md) | propuesta | 2026-10-16 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
