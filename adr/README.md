@@ -5,6 +5,8 @@ Para regenerarlo: `tools/adr index`
 
 | ADR | Estado | Fecha |
 |-----|--------|-------|
+| [Autorizar por JWT con ownership y endurecer el perímetro HTTP](autorizar-por-jwt-con-ownership-y-endurecer-el-perimetro-http.md) | aceptada | 2026-09-24 |
+| [Cifrar ubicación y PII sensible en reposo con AES-256-GCM](cifrar-ubicacion-y-pii-sensible-en-reposo.md) | aceptada | 2026-09-24 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
@@ -14,6 +16,7 @@ Para regenerarlo: `tools/adr index`
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
 | [Usar GitHub Actions como plataforma de CI/CD](usar-github-actions-para-ci-cd.md) | aceptada | 2026-09-24 |
+| [Usar identidad local con JWT y sacar la PII del navegador](usar-identidad-local-con-jwt.md) | aceptada | 2026-09-24 |
 | [Usar Kafka como bus de eventos](usar-kafka-como-bus-de-eventos.md) | aceptada | 2026-09-07 |
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | aceptada | 2026-08-27 |
 | [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | aceptada | 2026-08-27 |
