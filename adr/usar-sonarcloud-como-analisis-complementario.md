@@ -33,20 +33,15 @@ cambia quién puede verlos sin cuenta.
   herramienta de análisis estático complementaria a los tests.
 - Vamos a crear **dos proyectos** en la organización `g6d2` (región EU,
   dominio `sonarcloud.io`): `G6D2_emergencias-backend` y `G6D2_frontend`.
-  Hoy ambos están **privados en SonarCloud** y el análisis corre igual,
-  cubierto por el Free plan descripto en el contexto. **No decidimos
-  acá** si los pasamos a público: el 2026-10-09 el equipo acordó no
-  abrir el código y hacer el proyecto público en SonarCloud expone
-  contenido del código al mundo. La decisión queda pendiente, con tres
-  opciones:
-    - a) **Mantener privado** y mostrar el panel durante la demo con
-      cuenta propia.
-    - b) **Pasar a público** sabiendo que el código queda visible para
-      cualquiera, no sólo las métricas.
-    - c) **Invitar nominalmente a los profes** aprovechando el cupo
-      Free de 5 usuarios por organización.
-  La opción se discute por separado; mientras tanto, el acceso anónimo
-  devuelve "Project doesn't exist", que es el estado esperado.
+  Ambos quedan **privados en SonarCloud** y el análisis corre igual,
+  cubierto por el Free plan descripto en el contexto. **No los pasamos
+  a público**: el 2026-10-09 el equipo acordó no abrir el código y un
+  proyecto público en SonarCloud expone contenido del código al mundo,
+  no sólo las métricas. El panel se muestra durante la demo con cuenta
+  propia. Si la cátedra pide acceso por su cuenta, se puede invitar
+  nominalmente a los profes con el cupo Free de 5 usuarios por
+  organización, sin cambiar la visibilidad. El acceso anónimo devuelve
+  "Project doesn't exist", que es el estado esperado.
 - Vamos a agregar un **step de SonarCloud al final del job `lint-and-test`**
   en ambos workflows de CI, con `continue-on-error: true`, y a alimentarle
   el reporte `lcov` que ya generan Jest y Vitest.
@@ -91,8 +86,8 @@ cambia quién puede verlos sin cuenta.
 Se hace más fácil:
 
 - Ver un panel externo de calidad y cobertura sin correr el pipeline,
-  accesible al equipo con cuenta propia. El acceso de los profes
-  depende de qué opción tomemos sobre visibilidad (ver Decisión).
+  accesible al equipo con cuenta propia. Los profes lo ven en la demo
+  (o con invitación nominal si la piden; ver Decisión).
 - Detectar duplicación, complejidad alta y code smells que ESLint no
   reporta, al menos en las partes del código cubiertas por el scope de
   Sonar (todo el back; `lib` y `app/lib` del front).
@@ -152,3 +147,6 @@ Se hace más difícil:
   Sonar sea gate real no alcanza con quitar `continue-on-error`: hace
   falta además `sonar.qualitygate.wait=true` y branch protection, lo
   cual el plan free privado tampoco permite.
+- 2026-10-21: se cierra la visibilidad en SonarCloud: los proyectos
+  quedan privados y el panel se muestra en la demo con cuenta propia;
+  invitar nominalmente a los profes queda como salida si piden acceso.
