@@ -13,6 +13,7 @@ Para regenerarlo: `tools/adr index`
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
+| [Publicar las respuestas requeridas como un evento por tipo de recurso](publicar-las-respuestas-requeridas-como-un-evento-por-tipo-de-recurso.md) | propuesta | 2026-10-16 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
