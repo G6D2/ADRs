@@ -41,8 +41,8 @@ histórico de una sola vez.
 - Las passwords del login local van con **bcrypt**, no con AES (ver
   [Usar identidad local con JWT](usar-identidad-local-con-jwt.md)).
 - Minimizamos lo que queda guardado: un job anonimiza la ubicación
-  cifrada de las emergencias después de `LOCATION_RETENTION_HOURS`
-  (72 h por defecto) y otro limpia la PII de perfiles inactivos y las
+  cifrada de las emergencias `LOCATION_RETENTION_HOURS` después de
+  cerradas (72 h por defecto) y otro limpia la PII de perfiles inactivos y las
   ubicaciones guardadas sin actualizar después de
   `CITIZEN_PII_RETENTION_DAYS` (90 días por defecto).
 - El email de login queda en claro: es el identificador de la cuenta.
