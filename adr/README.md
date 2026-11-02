@@ -7,11 +7,11 @@ Para regenerarlo: `tools/adr index`
 |-----|--------|-------|
 | [Adoptar Next.js con App Router y un BFF](adoptar-next-js-con-app-router-y-un-bff.md) | aceptada | 2026-09-22 |
 | [Autorizar por JWT con ownership y endurecer el perímetro HTTP](autorizar-por-jwt-con-ownership-y-endurecer-el-perimetro-http.md) | aceptada | 2026-09-24 |
+| [Calcular los recursos requeridos con una tabla de reglas](calcular-los-recursos-requeridos-con-una-tabla-de-reglas.md) | propuesta | 2026-10-16 |
 | [Cifrar ubicación y PII sensible en reposo con AES-256-GCM](cifrar-ubicacion-y-pii-sensible-en-reposo.md) | aceptada | 2026-09-24 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
-| [Generar respuestas predeterminadas con reglas y templates por recurso](generar-respuestas-predeterminadas-con-reglas-y-templates-por-recurso.md) | propuesta | 2026-10-16 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
