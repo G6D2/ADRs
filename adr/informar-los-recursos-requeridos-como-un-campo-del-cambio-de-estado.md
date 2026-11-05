@@ -1,6 +1,6 @@
 # Informar los recursos requeridos como un campo del cambio de estado
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-10-16
 - Decisores: @juanimoli (Producto), @Matiamistadi y @luccaperazzo (Back), @valenfiumana (Seguridad)
 - Reemplaza a: —
@@ -64,3 +64,4 @@ Pendiente de definir:
 - 2026-10-16: creación del ADR (estado: propuesta)
 - 2026-11-02: se aplica el review del 2026-10-18. Al no haber consumidores, los eventos por recurso pasan a ser un campo del cambio de estado. Se saca el argumento de los permisos por tópico, que el gateway no ofrece, y queda barrio en vez de ubicación exacta. Cambia el título.
 - 2026-11-05: se suma un `EmergenciaActualizada` por cada recurso en `DESPACHADA`, que pide Analítica en su contrato del 2026-10-29.
+- 2026-11-05: cambio de estado: propuesta → aceptada

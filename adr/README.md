@@ -12,7 +12,7 @@ Para regenerarlo: `tools/adr index`
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
 | [Guardar el barrio de la emergencia al crearla](guardar-el-barrio-de-la-emergencia-al-crearla.md) | aceptada | 2026-10-16 |
-| [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | propuesta | 2026-10-16 |
+| [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | aceptada | 2026-10-16 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
