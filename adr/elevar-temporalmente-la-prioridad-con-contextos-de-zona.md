@@ -1,6 +1,6 @@
 # Elevar temporalmente la prioridad con contextos de zona
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-10-08
 - Decisores: @Salterm27, @Matiamistadi (motor de riesgo), @luccaperazzo (reglas de entrada). Los confirma Producto (@juanimoli).
 - Reemplaza a: —
@@ -142,3 +142,4 @@ Queda por confirmar:
 - 2026-10-08: creación del ADR (estado: propuesta)
 - 2026-10-16: se separan en ADRs propios el listener de eventos externos y el barrio de la emergencia; la deduplicación pasa al listener; se corrige la afirmación de que no agrega infraestructura.
 - 2026-11-02: se aplica el review del 2026-10-18: prioridad de despacho, cálculo en SQL, aviso climático, prioridad manual y alertas de toda la ciudad. Se suman los eventos reales de Espacios, el orden de llegada y el plan B, y la zona por radio queda como alternativa descartada.
+- 2026-11-05: cambio de estado: propuesta → aceptada
