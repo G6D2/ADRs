@@ -1,6 +1,6 @@
 # Consumir eventos externos con un listener y reglas por evento
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-10-16
 - Decisores: @juanimoli (Producto), @Salterm27, @Matiamistadi y @luccaperazzo (Back), @KevinAlajarin (DevOps)
 - Reemplaza a: —
@@ -83,3 +83,4 @@ Pendiente de definir:
 
 - 2026-10-16: creación del ADR (estado: propuesta)
 - 2026-11-02: se aplica el review del 2026-10-18 y la decisión de Producto del 2026-10-26. El listener queda dentro del backend, se suman el webhook como alternativa y el costo de SASL y Avro, y se alinea con el paquete `src/listeners/` de `main` (reglas en vez de mappers). Cambia el título.
+- 2026-11-05: cambio de estado: propuesta → aceptada
