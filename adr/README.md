@@ -8,6 +8,7 @@ Para regenerarlo: `tools/adr index`
 | [Adoptar Next.js con App Router y un BFF](adoptar-next-js-con-app-router-y-un-bff.md) | aceptada | 2026-09-22 |
 | [Autorizar por JWT con ownership y endurecer el perímetro HTTP](autorizar-por-jwt-con-ownership-y-endurecer-el-perimetro-http.md) | aceptada | 2026-09-24 |
 | [Cifrar ubicación y PII sensible en reposo con AES-256-GCM](cifrar-ubicacion-y-pii-sensible-en-reposo.md) | aceptada | 2026-09-24 |
+| [Consumir eventos externos con un listener y reglas por evento](consumir-eventos-externos-con-un-listener-y-reglas-por-evento.md) | aceptada | 2026-10-16 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
