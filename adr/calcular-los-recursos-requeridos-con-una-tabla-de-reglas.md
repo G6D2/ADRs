@@ -1,6 +1,6 @@
 # Calcular los recursos requeridos con una tabla de reglas
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-10-16
 - Decisores: @juanimoli (Producto), @Matiamistadi y @luccaperazzo (Back)
 - Reemplaza a: —
@@ -64,3 +64,4 @@ Pendiente de definir:
 
 - 2026-10-16: creación del ADR (estado: propuesta)
 - 2026-11-02: se aplica el review del 2026-10-18: los recursos se calculan al crear y se publican al validar, las reglas reciben tipo y condiciones, y un disparador externo siempre crea una emergencia propia. Con el campo del ADR de recursos, se saca el Template Method y la factory por recurso. Cambia el título.
+- 2026-11-05: cambio de estado: propuesta → aceptada
