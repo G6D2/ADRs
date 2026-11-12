@@ -1,15 +1,10 @@
 # Publicar coordenadas aproximadas en claro en los eventos del bus
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-12
 - Decisores: @juanimoli (Producto), @valenfiumana (Security), @KevinAlajarin (DevOps)
 - Reemplaza a: —
 - Reemplazada por: —
-
-> **Pendiente de verificación de Security (@valenfiumana).** Este ADR
-> revierte la decisión de Security del 2026-11-02. No pasa a `aceptada`
-> hasta que Valentina confirme la precisión (3 decimales en general y si
-> `PANICO` baja a 2) y el tratamiento de la retención en el bus.
 
 ## Contexto
 
@@ -57,10 +52,10 @@ Fuerzas en juego:
 - Vamos a publicar `data.latitud` y `data.longitud` **en claro, como
   número, redondeadas a 3 decimales** (~100 m) en `EmergenciaCreada` y
   `EmergenciaActualizada` (PR #92 del backend).
-- **[A definir con Security]** Para `categoria = PANICO` vamos a redondear
-  a **2 decimales** (~1 km), porque el punto suele ser el domicilio o la
-  posición de la persona. El resto de las categorías son hechos en la vía
-  pública (incendio, infraestructura, disturbio, tránsito, preventiva).
+- La misma precisión aplica a todas las categorías, **incluida
+  `PANICO`**. Se evaluó bajarla a 2 decimales (~1 km) para pánico, y
+  Security aprobó mantener 3: con 1 km los consumidores no pueden trabajar
+  con sus radios de 300–500 m.
 - Vamos a publicar las dos coordenadas o ninguna: si la emergencia no
   tiene ubicación, o ya fue anonimizada por retención, van en `null`.
 - La coordenada exacta sigue viajando cifrada en `data.ubicacion`, sin
@@ -77,6 +72,7 @@ Fuerzas en juego:
 | Opción | Pros | Contras |
 |---|---|---|
 | **Coordenadas redondeadas en claro** (elegida) | Funciona con lo que los consumidores ya leen. Sin cambios en el catálogo. 100 m alcanza para radios de 300–500 m. | Sale del módulo una ubicación aproximada que no controlamos después. |
+| `PANICO` a 2 decimales y el resto a 3 | Menos precisión justo donde el punto puede ser un domicilio. | 1 km no sirve para los radios de 300–500 m: los consumidores no podrían reaccionar a las emergencias de pánico. |
 | Solo cifradas (lo de hoy) | Minimiza PII. | Nadie descifra: la integración no funciona para ningún módulo. |
 | Compartir la clave del bus con los consumidores | Punto exacto, sin cambiar el contrato. | Distribuir una clave simétrica a cinco equipos equivale a publicar en claro, y además agrega gestión de claves. |
 | Solo barrio | Ya está en claro. | No sirve para radios: Residuos y Movilidad lo confirmaron. |
@@ -111,3 +107,6 @@ Neutras:
 - 2026-11-12: Producto decide publicar coordenadas aproximadas (PR #92 del
   backend). Creación del ADR (estado: propuesta), pendiente de la revisión
   de Security sobre la precisión para `PANICO`.
+- 2026-11-12: Security (@valenfiumana) aprueba el ADR fuera de GitHub:
+  3 decimales para todas las categorías, incluida `PANICO`. Estado:
+  aceptada.
