@@ -17,6 +17,7 @@ Para regenerarlo: `tools/adr index`
 | [Guardar el barrio de la emergencia al crearla](guardar-el-barrio-de-la-emergencia-al-crearla.md) | aceptada | 2026-10-16 |
 | [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | aceptada | 2026-10-16 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
+| [Publicar coordenadas aproximadas en claro en los eventos del bus](publicar-coordenadas-aproximadas-en-claro-en-los-eventos-del-bus.md) | propuesta | 2026-11-12 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
