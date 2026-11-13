@@ -1,8 +1,8 @@
 # Elevar la prioridad en un radio alrededor del evento
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-12
-- Decisores: @Salterm27 (lo implementó en el backend). Lo confirma Producto (@juanimoli), que todavía no lo revisó.
+- Decisores: @Salterm27 (lo implementó en el backend) y Producto (@juanimoli), que lo confirmó el 2026-11-13.
 - Reemplaza a: [Elevar temporalmente la prioridad con contextos de zona](elevar-temporalmente-la-prioridad-con-contextos-de-zona.md)
 - Reemplazada por: —
 
@@ -78,3 +78,4 @@ Sin implementar todavía, igual que con el ADR anterior: el alta y la baja de co
 ## Historial
 
 - 2026-11-12: creación del ADR (estado: propuesta). Documenta el cambio que ya está en producción (PR #96 de `emergencias-backend`) y reemplaza al ADR por barrio.
+- 2026-11-13: cambio de estado: propuesta → aceptada
