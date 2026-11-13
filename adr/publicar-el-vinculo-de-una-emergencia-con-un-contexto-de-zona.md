@@ -58,7 +58,7 @@ Fuerzas y restricciones:
   los consumidores tienen que poder distinguir vínculos viejos de nuevos.
 - **Privacidad.** Un vínculo dice "esta emergencia estuvo a menos de 500 m
   de este punto". Por eso el backend lo borra junto con la ubicación al
-  anonimizar (72 h, `LOCATION_RETENTION_HOURS`). Para todas las categorías
+  anonimizar (72 h después del cierre, `LOCATION_RETENTION_HOURS`). Para todas las categorías
   salvo `PANICO` eso es menos preciso que la coordenada de ~100 m que ya
   publicamos. Para `PANICO`, el ADR de coordenadas tiene pendiente bajar a
   2 decimales (~1 km): ahí el vínculo daría más precisión que la
@@ -115,8 +115,8 @@ lugar de pedir a los consumidores que lo recalculen.
 6. **Carga inicial (backfill).** Un script encola, una vez y con
    `backfill: true`, los vínculos que ya existen y no tienen evento. Es
    idempotente. **Solo puede recuperar los vínculos que siguen en la
-   base**: los de emergencias ya anonimizadas se borraron, así que la
-   historia de Analítica empieza unas 72 h antes del despliegue.
+   base**: los de emergencias abiertas o cerradas hace menos de 72 h. Los
+   de emergencias ya anonimizadas se borraron y no se pueden recuperar.
 
 7. **Privacidad.**
    - Aplica la regla del ADR de coordenadas para eventos nuevos con
@@ -170,8 +170,8 @@ lugar de pedir a los consumidores que lo recalculen.
   hacia atrás.
 - Hasta que Security decida, los vínculos de `PANICO` no se publican y el
   conteo de Analítica no los incluye.
-- La historia anterior al despliegue se pierde salvo las ~72 h que siguen
-  en la base.
+- La historia anterior a la activación se pierde, salvo los vínculos de
+  emergencias abiertas o cerradas hace menos de 72 h.
 - El vínculo es un dato derivado de la ubicación que sale del módulo; una
   vez en el bus, su retención no la controlamos.
 
