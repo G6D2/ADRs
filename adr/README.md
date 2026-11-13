@@ -20,6 +20,7 @@ Para regenerarlo: `tools/adr index`
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
 | [Publicar coordenadas aproximadas en claro en los eventos del bus](publicar-coordenadas-aproximadas-en-claro-en-los-eventos-del-bus.md) | propuesta | 2026-11-12 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
+| [Publicar el vínculo de una emergencia con un contexto de zona](publicar-el-vinculo-de-una-emergencia-con-un-contexto-de-zona.md) | propuesta | 2026-11-13 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
