@@ -47,6 +47,13 @@ Fuerzas en juego:
    no está de turno. El access token dura 15 minutos y no hay revocación.
    El 15/11/2026 el Grupo 2 confirmó que **este año no va a publicar un
    evento de baja ni un endpoint que liste los usuarios de `poli`**.
+   También confirmó cómo responde el refresh (rota el refresh token y
+   relee a la persona en el LDAP con `reloadBySub`):
+   - si la sacaron de un grupo, **renueva** y el token nuevo trae sus
+     grupos actuales (`memberOf`), ya sin ese grupo;
+   - **rechaza** si la cuenta fue borrada o deshabilitada
+     (`pwdAccountLockedTime`), si cambió de módulo (OU) y el cliente ya no
+     lo acepta, o si el refresh se reusó, venció o cambió la audience.
 5. **La máquina de estados** solo permite volver a `VALIDATED` desde
    `DISPATCHED` (devolución del dispatcher). `EN_ROUTE` y `ON_SCENE` no
    tienen vuelta atrás.
@@ -108,12 +115,21 @@ Sin señal del Grupo 2, separamos dos cosas:
   nuevos; el que tiene vence en 15 minutos como máximo. No dependemos de
   enterarnos para eso.
 - **El catálogo se entera por dos vías:**
-  1. **Login sin `poli`:** si un `sub` vinculado llega con un token que ya
-     no trae el grupo de oficial (lo sacaron de `poli` pero sigue en el
-     LDAP), se lo da de baja en ese momento. Es automático, pero no ve a
-     quien fue borrado del LDAP, porque esa persona ya no puede entrar.
-  2. **Baja manual del dispatcher:** en `/ops/oficiales`, el dispatcher
-     marca al oficial como dado de baja
+  1. **Token sin `poli`:** como el refresh relee los grupos en el LDAP,
+     a quien sacan de `poli` (y sigue en el LDAP) le llega, a los 15
+     minutos como máximo, un token sin ese grupo. Si un `sub` vinculado a
+     un oficial llega con un token sin grupo de oficial, se lo da de baja
+     en ese momento. Por eso el chequeo corre en **todo** token federado
+     cuyo `sub` esté vinculado, traiga o no grupos de oficial (sin `poli`,
+     el front lo manda a las pantallas de ciudadano y esos requests son
+     los que lo detectan). Si la persona no tiene la app abierta, se
+     detecta la próxima vez que entre; mientras tanto ya no tiene acceso
+     de oficial. No ve a quien fue borrado, deshabilitado o movido de
+     módulo: a esa persona el refresh la rechaza y no nos vuelve a
+     mandar un token.
+  2. **Baja manual del dispatcher** (para cuentas borradas,
+     deshabilitadas o movidas de módulo): en `/ops/oficiales`, el
+     dispatcher marca al oficial como dado de baja
      (`PATCH /api/officers/:id/deactivate`, con motivo). Es la vía para
      quien fue borrado del LDAP o para cuando el dispatcher se entera
      por otro canal (el oficial no responde, aviso de la jefatura).
@@ -183,8 +199,8 @@ dispatcher, para que una decisión explícita no se pise sola.
 
 | Alternativa | Decisión | Motivo |
 |---|---|---|
-| Detectar el login sin `poli` | **Se hace** | Automático y sin depender de nadie, aunque solo ve a quien sigue en el LDAP. |
-| Baja manual del dispatcher | **Se hace** | Cubre a quien fue borrado del LDAP, que nunca vuelve a mandarnos un token. |
+| Detectar el token sin `poli` | **Se hace** | Automático: como el refresh relee los grupos, una salida de `poli` llega en 15 minutos como máximo con la sesión abierta. Solo ve a quien sigue en el LDAP. |
+| Baja manual del dispatcher | **Se hace** | Cubre a quien fue borrado, deshabilitado o movido de módulo: el refresh lo rechaza y nunca vuelve a mandarnos un token. |
 | Evento del Grupo 2 en el bus | Descartada | El Grupo 2 no lo va a hacer este año (15/11/2026). Sería la vía preferida si cambia. |
 | Reconciliación periódica contra una API del Grupo 2 | Descartada | El Grupo 2 no va a exponer el listado este año (15/11/2026). |
 | Dar de baja por inactividad (N horas sin entrar) | Descartada | No distingue a alguien dado de baja de alguien que no está de turno: le cortaría el acceso a oficiales activos. `last_seen_at` queda solo como dato informativo. |
@@ -260,15 +276,16 @@ Neutras:
   con un oficial sin acceso durante mucho tiempo, sin que nadie avance.
   Mitigación a evaluar: alerta si un caso marcado sigue sin reasignar
   pasados N minutos.
-- **Oficial fantasma:** alguien borrado del LDAP sigue `disponible` en el
-  catálogo hasta la baja manual. El dispatcher puede asignarle un caso
+- **Oficial fantasma:** alguien borrado, deshabilitado o movido de
+  módulo en el LDAP sigue `disponible` en el catálogo hasta la baja
+  manual (a quien solo sacan de `poli` lo detecta el token). El dispatcher puede asignarle un caso
   nuevo que nadie va a atender. Mitigación a evaluar: mostrar
   `last_seen_at` en el catálogo y en el modal de asignar, y avisar si el
   oficial no aparece hace más de un turno (solo aviso, sin baja
   automática).
 - **Baja masiva por error del LDAP:** si alguien quita por error el grupo
-  `poli`, todos los oficiales pierden el acceso a la vez y, a medida que
-  entran, se van marcando. Los casos no se mueven, pero nadie puede
+  `poli`, en 15 minutos todos los oficiales con sesión abierta reciben un
+  token sin el grupo y se van marcando. Los casos no se mueven, pero nadie puede
   actualizarlos hasta que el LDAP se corrija (y se reactivan solos al
   volver a entrar) o el dispatcher reasigne.
 - **Baja manual equivocada:** el dispatcher marca al oficial equivocado.
@@ -295,17 +312,18 @@ Neutras:
   su caché. Hoy hay una sola instancia en Render; el TTL acota la ventana.
 - **Catálogo que crece:** cada `poli` que entra una vez queda en la tabla.
   Los dados de baja no se borran (por el historial), solo se ocultan.
-- **Ventana de 15 minutos** después de la baja en el LDAP: el token viejo
-  sigue sirviendo hasta que vence, salvo que el dispatcher haga la baja
+- **Ventana de 15 minutos** después de la baja en el LDAP: el access
+  token viejo sigue sirviendo hasta que vence (el refresh ya trae los
+  grupos nuevos o se rechaza), salvo que el dispatcher haga la baja
   manual antes.
 - **Experiencia del oficial dado de baja:** pasa de golpe a recibir 403;
   el front tiene que mostrarlo y cerrarle la sesión en vez de reintentar.
 
 ### Pendientes para pasar a `aceptada`
 
-1. Confirmar con el Grupo 2 que el refresh rechaza a los usuarios dados
-   de baja y que no reutilizan `sub`, y pedir el claim `name` (y chapa si
-   la tienen). El evento de baja y el listado quedan fuera por este año.
+1. Confirmar con el Grupo 2 que no reutilizan `sub` y pedir el claim
+   `name` (y chapa si la tienen). El comportamiento del refresh ya está
+   confirmado; el evento de baja y el listado quedan fuera por este año.
 2. Confirmar con Producto la reasignación desde `EN_ROUTE`/`ON_SCENE` y
    cuánto tiempo puede quedar un caso marcado antes de alertar.
 3. Confirmar con Security que el vínculo puede guardarse en claro.
@@ -327,3 +345,7 @@ Neutras:
 - 2026-11-15: el Grupo 2 confirma que este año no publica evento de baja
   ni listado de `poli`. Se descartan esas dos vías y se suma la baja
   manual del dispatcher.
+- 2026-11-15: el Grupo 2 confirma que el refresh relee los grupos en el
+  LDAP y rechaza cuentas borradas, deshabilitadas o movidas de módulo. La
+  salida de `poli` pasa a detectarse sola en 15 minutos; la baja manual
+  queda para los otros casos.
