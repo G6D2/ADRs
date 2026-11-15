@@ -38,9 +38,9 @@ Fuerzas en juego:
    `poli`, tiene que quedar disponible como oficial sin tocar código ni
    configuración.
 3. **Bajas efectivas.** Si alguien sale del LDAP (o del grupo `poli`),
-   tiene que perder el acceso y sus casos tienen que volver a quedar sin
-   asignar, para que el dispatcher los reasigne. Un caso no puede quedar
-   en manos de alguien que ya no es oficial.
+   tiene que perder el acceso, y el dispatcher tiene que poder reasignar
+   sus casos a otro oficial, en cualquier estado en curso. Un caso no
+   puede quedar trabado en manos de alguien que ya no es oficial.
 4. **No hay canal de bajas hoy.** Nos enteramos de quién es alguien solo
    cuando nos manda un token. Alguien que salió del LDAP simplemente deja
    de mandarlos, y eso no se distingue de un oficial que no está de turno.
@@ -114,29 +114,41 @@ Se combinan tres señales, de la más a la menos rápida:
    no trae el grupo de oficial, se lo da de baja en ese momento. No cuesta
    nada, pero solo actúa si la persona vuelve a entrar.
 
-### 4. Efecto de la baja
+### 4. Efecto de la baja: la reasignación la decide el dispatcher
 
-En una sola transacción:
+La baja **no mueve los casos sola**. Corta el acceso y le avisa al
+dispatcher, que es quien decide a quién reasignar:
 
-1. El oficial queda `active = false` (sale del catálogo asignable de
-   `GET /api/officers`).
-2. Sus emergencias abiertas vuelven a `VALIDATED` sin oficial, con actor
-   `system` y motivo `oficial dado de baja en LDAP`. Cada cambio deja su
-   fila en `emergency_status_history` y su `EmergenciaActualizada` en el
-   outbox, como cualquier transición.
-3. A partir de ahí `authenticate` rechaza (403) a ese oficial aunque su
-   token siga vigente, porque consulta `active` en el catálogo.
+1. El oficial queda `active = false` y sale del catálogo asignable de
+   `GET /api/officers`.
+2. `authenticate` lo rechaza (403) aunque su token siga vigente, porque
+   consulta `active` en el catálogo.
+3. Sus emergencias en curso **quedan como están**, con su
+   `assigned_officer_id`. La API las devuelve marcadas
+   (`assignedOfficerActive: false`) y el tablero del dispatcher las
+   destaca como "oficial dado de baja, reasignar".
+4. El dispatcher las **reasigna en un paso** a otro oficial activo con
+   `PATCH /api/emergencies/:id/reassign`. Esa acción solo se permite si
+   el oficial asignado está inactivo.
 
 Por estado:
 
-| Estado | Qué pasa |
+| Estado | Qué puede hacer el dispatcher |
 |---|---|
-| `DISPATCHED` | Vuelve a `VALIDATED` con la transición que ya existe. |
-| `EN_ROUTE`, `ON_SCENE` | Vuelve a `VALIDATED` con una **transición nueva, solo para `system`**, y queda marcada para el dispatcher (puede haber alguien en el lugar). |
-| `RESOLVED` | No cambia: el trabajo está hecho y lo cierra el dispatcher. |
+| `DISPATCHED` | Reasignar (queda `DISPATCHED` con el oficial nuevo). También sirve el camino actual: devolver a `VALIDATED` y asignar. |
+| `EN_ROUTE`, `ON_SCENE` | Reasignar: vuelve a `DISPATCHED` con el oficial nuevo, que arranca desde "en camino". Es una **transición nueva**, solo para el dispatcher y solo con el oficial asignado inactivo. |
+| `RESOLVED` | Nada que reasignar: el trabajo está hecho y el dispatcher la cierra. |
 
-Si la persona vuelve al grupo `poli`, al entrar se reactiva la misma fila
-(mismo `idp_sub`): conserva su historial, pero no recupera los casos.
+La reasignación es una transacción: cambia `assigned_officer_id`, deja la
+fila en `emergency_status_history` (actor = dispatcher, motivo
+`reasignada: oficial dado de baja en LDAP`, con el oficial anterior y el
+nuevo), marca `ocupado` al oficial nuevo y emite `EmergenciaActualizada`
+en el outbox, como cualquier transición.
+
+Si la persona vuelve al grupo `poli` antes de que el dispatcher reasigne,
+al entrar se reactiva la misma fila (mismo `idp_sub`), deja de estar
+marcada y recupera sus casos tal como estaban. Si ya se reasignaron, no
+los recupera.
 
 ### 5. Criptografía
 
@@ -144,8 +156,8 @@ Si la persona vuelve al grupo `poli`, al entrar se reactiva la misma fila
   Grupo 2: es lo que garantiza que el grupo `poli` es auténtico.
 - **Se exige autenticación del evento de baja.** El listener solo acepta
   bajas que lleguen por el canal autenticado del gateway del Grupo 1 o
-  firmadas por el IdP. Si no, cualquiera con acceso al bus podría
-  desasignar a todos los oficiales.
+  firmadas por el IdP. Si no, cualquiera con acceso al bus podría dejar a
+  todos los oficiales sin acceso.
 - **No se hashea el vínculo** (`idp_sub`, `ldap_username`): ver
   alternativas descartadas.
 
@@ -177,10 +189,11 @@ Si la persona vuelve al grupo `poli`, al entrar se reactiva la misma fila
 
 | Alternativa | Decisión | Motivo |
 |---|---|---|
-| Devolver `DISPATCHED`, `EN_ROUTE` y `ON_SCENE` a `VALIDATED` (elegida) | **Se hace** | Ningún caso queda en manos de alguien sin acceso. |
-| Devolver solo `DISPATCHED` | Descartada | Los casos en curso quedarían con un oficial que ya no puede actualizarlos. |
+| Marcar los casos y que el dispatcher los reasigne en un paso, en `DISPATCHED`, `EN_ROUTE` u `ON_SCENE` (elegida) | **Se hace** | Una persona decide con contexto (puede haber alguien en el lugar); una baja errónea del LDAP no desarma la operación en curso; la reasignación queda auditada con el dispatcher como actor. |
+| Devolver todo a `VALIDATED` automáticamente, con actor `system` | Descartada | Una baja errónea o un evento forjado desasignaría todos los casos en curso de golpe, y un caso `ON_SCENE` volvería a la cola con alguien todavía en el lugar. |
+| Devolver solo `DISPATCHED` automáticamente | Descartada | Los casos en curso quedarían con un oficial que ya no puede actualizarlos y sin forma de reasignarlos. |
+| Reasignar en dos pasos (devolver a `VALIDATED` y asignar) | Descartada para `EN_ROUTE`/`ON_SCENE` | Hoy la devolución solo existe desde `DISPATCHED`; abrirla desde otros estados para cualquier caso es más amplio que lo necesario. Para `DISPATCHED` sigue disponible. |
 | Cancelar los casos | Descartada | La emergencia sigue existiendo: hay que reasignarla, no cerrarla. |
-| Dejarlos asignados y solo avisar al dispatcher | Descartada | Depende de que alguien actúe; es justamente lo que queremos evitar. |
 
 ### Criptografía
 
@@ -201,9 +214,10 @@ Se hace más fácil:
   que tocar Render, código ni la base.
 - Saber quién es cada oficial: el catálogo es el único lugar, y el LDAP
   manda sobre quién pertenece.
-- Asegurar que ningún caso quede asignado a alguien sin acceso.
-- Auditar: el historial y los eventos dicen `system` y el motivo de cada
-  desasignación.
+- Cortar el acceso de quien sale del LDAP sin mover casos por sorpresa.
+- Reasignar en un paso un caso trabado, en cualquier estado en curso.
+- Auditar: el historial dice qué dispatcher reasignó, desde qué oficial
+  y por qué.
 
 Se hace más difícil o cuesta:
 
@@ -215,8 +229,13 @@ Se hace más difícil o cuesta:
 - Sin el claim `name`, el catálogo muestra el usuario (`of.gorgory`) en
   vez del nombre; sin chapa, la columna queda vacía.
 - Cambia la máquina de estados (transición nueva `EN_ROUTE`/`ON_SCENE` →
-  `VALIDATED` solo para `system`) y, con ella, lo que ven los
-  consumidores de `EmergenciaActualizada`.
+  `DISPATCHED`, solo para el dispatcher y solo con el oficial asignado
+  inactivo) y, con ella, lo que ven los consumidores de
+  `EmergenciaActualizada`.
+- Los casos del oficial dado de baja quedan quietos hasta que el
+  dispatcher actúa: la reasignación depende de que alguien mire el
+  tablero.
+- El front suma la marca en el tablero y la acción de reasignar.
 - `authenticate` pasa a consultar la base para los oficiales federados
   (mitigado con caché).
 - Hay que mantener un listener nuevo y, si existe la API, un job.
@@ -229,17 +248,25 @@ Neutras:
 
 ### No esperadas (riesgos a vigilar)
 
+- **Casos olvidados:** si nadie mira el tablero, un caso puede quedar
+  con un oficial sin acceso durante mucho tiempo, sin que nadie avance.
+  Mitigación a evaluar: alerta si un caso marcado sigue sin reasignar
+  pasados N minutos.
 - **Baja masiva por error del LDAP:** si alguien quita por error el grupo
-  `poli` (o el evento llega mal), se desasignan todos los casos en curso
-  de golpe. Mitigación a evaluar: un tope de bajas por ventana que frene
-  y alerte en vez de aplicar.
-- **Oficial en el lugar desasignado:** un caso `ON_SCENE` vuelve a
-  `VALIDATED` mientras la persona sigue físicamente ahí. El dispatcher
-  podría mandar a un segundo oficial sin saberlo; por eso la marca en el
-  tablero.
+  `poli` (o el evento llega mal), todos los oficiales pierden el acceso a
+  la vez y el tablero se llena de casos marcados. Los casos no se mueven,
+  pero nadie puede actualizarlos hasta que el LDAP se corrija o el
+  dispatcher reasigne.
+- **Oficial en el lugar sin acceso:** un oficial `ON_SCENE` dado de baja
+  sigue físicamente en el lugar pero ya no puede marcar "resuelta". El
+  dispatcher tiene que coordinar por otra vía antes de reasignar, para no
+  mandar a un segundo oficial sin saberlo.
 - **Consumidores del bus que no esperan ir hacia atrás:** otros módulos
-  pueden asumir que después de `EN_CAMINO` no viene `VALIDADA`. Hay que
+  pueden asumir que después de `EN_CAMINO` no viene `DESPACHADA`. Hay que
   avisarlo como cambio de contrato.
+- **Reasignar a quien vuelve:** si el LDAP lo reactiva justo mientras el
+  dispatcher reasigna, la acción tiene que fallar limpia (409: el oficial
+  asignado ya está activo) en vez de pisar el caso.
 - **Reutilización de usuarios en el LDAP:** si el Grupo 2 reasigna un
   `preferred_username` a otra persona, una reserva por `ldap_username`
   sin usar quedaría para la persona equivocada. Por eso, una vez
@@ -267,7 +294,8 @@ Neutras:
    liste los usuarios de `poli`, claim `name` (y chapa si la tienen), y
    confirmar que el refresh rechaza usuarios dados de baja y que no
    reutilizan `sub`.
-2. Confirmar con Producto la transición nueva desde `EN_ROUTE`/`ON_SCENE`.
+2. Confirmar con Producto la reasignación desde `EN_ROUTE`/`ON_SCENE` y
+   cuánto tiempo puede quedar un caso marcado antes de alertar.
 3. Confirmar con Security que el vínculo puede guardarse en claro.
 4. Definir si `of.gorgory` es un oficial nuevo o se reserva uno de los
    existentes con `ldap_username`.
@@ -282,3 +310,6 @@ Neutras:
 ## Historial
 
 - 2026-11-15: creación del ADR (estado: propuesta)
+- 2026-11-15: la baja deja de desasignar los casos automáticamente; los
+  marca y el dispatcher los reasigna en un paso (también desde
+  `EN_ROUTE`/`ON_SCENE`).
