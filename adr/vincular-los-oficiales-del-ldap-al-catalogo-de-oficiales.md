@@ -41,10 +41,12 @@ Fuerzas en juego:
    tiene que perder el acceso, y el dispatcher tiene que poder reasignar
    sus casos a otro oficial, en cualquier estado en curso. Un caso no
    puede quedar trabado en manos de alguien que ya no es oficial.
-4. **No hay canal de bajas hoy.** Nos enteramos de quién es alguien solo
-   cuando nos manda un token. Alguien que salió del LDAP simplemente deja
-   de mandarlos, y eso no se distingue de un oficial que no está de turno.
-   El access token dura 15 minutos y no hay revocación.
+4. **No hay ni habrá este año un canal de bajas.** Nos enteramos de quién
+   es alguien solo cuando nos manda un token. Alguien que salió del LDAP
+   simplemente deja de mandarlos, y eso no se distingue de un oficial que
+   no está de turno. El access token dura 15 minutos y no hay revocación.
+   El 15/11/2026 el Grupo 2 confirmó que **este año no va a publicar un
+   evento de baja ni un endpoint que liste los usuarios de `poli`**.
 5. **La máquina de estados** solo permite volver a `VALIDATED` desde
    `DISPATCHED` (devolución del dispatcher). `EN_ROUTE` y `ON_SCENE` no
    tienen vuelta atrás.
@@ -98,31 +100,34 @@ rate limit no cambian. Se actualiza `last_seen_at`.
 **El vínculo solo usa identificadores exactos** (`sub` o un
 `ldap_username` reservado a propósito). No se vincula por nombre.
 
-### 3. Detección de bajas
+### 3. Bajas: el acceso lo corta el LDAP, el catálogo lo marcamos nosotros
 
-Se combinan tres señales, de la más a la menos rápida:
+Sin señal del Grupo 2, separamos dos cosas:
 
-1. **Evento del Grupo 2 en el bus** (usuario dado de baja o sacado de
-   `poli`), consumido con el mismo esquema de listeners que ya usamos
-   para Espacios y Reclamos. Es la vía principal. **Depende del Grupo 2:**
-   hoy no publica ese evento y hay que pedirlo.
-2. **Reconciliación periódica:** si el Grupo 2 expone un endpoint que
-   lista los usuarios de `poli`, un job compara esa lista con los
-   oficiales vinculados y da de baja a los que faltan. Es el respaldo si
-   no hay evento.
-3. **Login sin `poli`:** si un `sub` vinculado llega con un token que ya
-   no trae el grupo de oficial, se lo da de baja en ese momento. No cuesta
-   nada, pero solo actúa si la persona vuelve a entrar.
+- **El acceso se corta solo.** Quien sale del LDAP ya no consigue tokens
+  nuevos; el que tiene vence en 15 minutos como máximo. No dependemos de
+  enterarnos para eso.
+- **El catálogo se entera por dos vías:**
+  1. **Login sin `poli`:** si un `sub` vinculado llega con un token que ya
+     no trae el grupo de oficial (lo sacaron de `poli` pero sigue en el
+     LDAP), se lo da de baja en ese momento. Es automático, pero no ve a
+     quien fue borrado del LDAP, porque esa persona ya no puede entrar.
+  2. **Baja manual del dispatcher:** en `/ops/oficiales`, el dispatcher
+     marca al oficial como dado de baja
+     (`PATCH /api/officers/:id/deactivate`, con motivo). Es la vía para
+     quien fue borrado del LDAP o para cuando el dispatcher se entera
+     por otro canal (el oficial no responde, aviso de la jefatura).
 
 ### 4. Efecto de la baja: la reasignación la decide el dispatcher
 
-La baja **no mueve los casos sola**. Corta el acceso y le avisa al
-dispatcher, que es quien decide a quién reasignar:
+La baja (automática o manual) **no mueve los casos sola**. Marca al
+oficial y deja que el dispatcher decida a quién reasignar:
 
 1. El oficial queda `active = false` y sale del catálogo asignable de
    `GET /api/officers`.
 2. `authenticate` lo rechaza (403) aunque su token siga vigente, porque
-   consulta `active` en el catálogo.
+   consulta `active` en el catálogo. Así una baja manual corta también
+   la ventana de 15 minutos del token.
 3. Sus emergencias en curso **quedan como están**, con su
    `assigned_officer_id`. La API las devuelve marcadas
    (`assignedOfficerActive: false`) y el tablero del dispatcher las
@@ -145,19 +150,19 @@ fila en `emergency_status_history` (actor = dispatcher, motivo
 nuevo), marca `ocupado` al oficial nuevo y emite `EmergenciaActualizada`
 en el outbox, como cualquier transición.
 
-Si la persona vuelve al grupo `poli` antes de que el dispatcher reasigne,
-al entrar se reactiva la misma fila (mismo `idp_sub`), deja de estar
-marcada y recupera sus casos tal como estaban. Si ya se reasignaron, no
-los recupera.
+Reactivación: si la baja fue **automática** (login sin `poli`) y la
+persona vuelve al grupo, al entrar se reactiva la misma fila (mismo
+`idp_sub`) y recupera los casos que todavía no se reasignaron. Si la baja
+fue **manual**, entrar con `poli` no la deshace: la revierte el
+dispatcher, para que una decisión explícita no se pise sola.
 
 ### 5. Criptografía
 
 - **Se mantiene** la verificación RS256 del token contra el JWKS del
   Grupo 2: es lo que garantiza que el grupo `poli` es auténtico.
-- **Se exige autenticación del evento de baja.** El listener solo acepta
-  bajas que lleguen por el canal autenticado del gateway del Grupo 1 o
-  firmadas por el IdP. Si no, cualquiera con acceso al bus podría dejar a
-  todos los oficiales sin acceso.
+- **La baja manual** queda protegida como cualquier acción del
+  dispatcher: token verificado, grupo `dispatcher` y registro de quién y
+  por qué.
 - **No se hashea el vínculo** (`idp_sub`, `ldap_username`): ver
   alternativas descartadas.
 
@@ -178,11 +183,12 @@ los recupera.
 
 | Alternativa | Decisión | Motivo |
 |---|---|---|
-| Evento del Grupo 2 en el bus | **Se hace** (depende del Grupo 2) | Llega en segundos y reutiliza la infraestructura de listeners. |
-| Reconciliación periódica contra una API del Grupo 2 | **Se hace como respaldo** (depende del Grupo 2) | Cubre eventos perdidos o la ausencia de eventos. |
-| Detectar el login sin `poli` | **Se hace** | Gratis, aunque llega tarde. |
+| Detectar el login sin `poli` | **Se hace** | Automático y sin depender de nadie, aunque solo ve a quien sigue en el LDAP. |
+| Baja manual del dispatcher | **Se hace** | Cubre a quien fue borrado del LDAP, que nunca vuelve a mandarnos un token. |
+| Evento del Grupo 2 en el bus | Descartada | El Grupo 2 no lo va a hacer este año (15/11/2026). Sería la vía preferida si cambia. |
+| Reconciliación periódica contra una API del Grupo 2 | Descartada | El Grupo 2 no va a exponer el listado este año (15/11/2026). |
 | Dar de baja por inactividad (N horas sin entrar) | Descartada | No distingue a alguien dado de baja de alguien que no está de turno: le cortaría el acceso a oficiales activos. `last_seen_at` queda solo como dato informativo. |
-| Introspección del token en cada request | Descartada | Agrega un llamado al IdP por request (latencia y dependencia en línea) para achicar una ventana de 15 minutos que la baja en el catálogo ya cierra apenas nos enteramos. |
+| Introspección del token en cada request | Descartada | Tampoco existe un endpoint del Grupo 2 para eso, y agregaría un llamado al IdP por request para achicar una ventana de 15 minutos. |
 | Aceptar que el token venza solo, sin baja en el catálogo | Descartada | El oficial seguiría en el catálogo asignable y sus casos quedarían colgados. |
 
 ### Qué hacer con los casos del oficial dado de baja
@@ -190,7 +196,7 @@ los recupera.
 | Alternativa | Decisión | Motivo |
 |---|---|---|
 | Marcar los casos y que el dispatcher los reasigne en un paso, en `DISPATCHED`, `EN_ROUTE` u `ON_SCENE` (elegida) | **Se hace** | Una persona decide con contexto (puede haber alguien en el lugar); una baja errónea del LDAP no desarma la operación en curso; la reasignación queda auditada con el dispatcher como actor. |
-| Devolver todo a `VALIDATED` automáticamente, con actor `system` | Descartada | Una baja errónea o un evento forjado desasignaría todos los casos en curso de golpe, y un caso `ON_SCENE` volvería a la cola con alguien todavía en el lugar. |
+| Devolver todo a `VALIDATED` automáticamente, con actor `system` | Descartada | Una baja errónea desasignaría todos los casos en curso de golpe, y un caso `ON_SCENE` volvería a la cola con alguien todavía en el lugar. |
 | Devolver solo `DISPATCHED` automáticamente | Descartada | Los casos en curso quedarían con un oficial que ya no puede actualizarlos y sin forma de reasignarlos. |
 | Reasignar en dos pasos (devolver a `VALIDATED` y asignar) | Descartada para `EN_ROUTE`/`ON_SCENE` | Hoy la devolución solo existe desde `DISPATCHED`; abrirla desde otros estados para cualquier caso es más amplio que lo necesario. Para `DISPATCHED` sigue disponible. |
 | Cancelar los casos | Descartada | La emergencia sigue existiendo: hay que reasignarla, no cerrarla. |
@@ -200,7 +206,6 @@ los recupera.
 | Alternativa | Decisión | Motivo |
 |---|---|---|
 | Verificar RS256 contra el JWKS (ya existe) | **Se mantiene** | Garantiza la autenticidad del grupo. |
-| Exigir autenticación del evento de baja | **Se hace** | Evita bajas forjadas que dejen a los oficiales sin acceso. |
 | Guardar `idp_sub`/`ldap_username` como HMAC con clave | Descartada por ahora | El `sub` ya es opaco y el catálogo guarda el nombre en claro; el hash impide leer el vínculo para depurar. Se revisa si Security clasifica estos identificadores como PII (se haría con una clave gestionada como `LOCATION_ENCRYPTION_KEY`). |
 | Cifrar el vínculo con AES | Descartada | Para buscar por el valor haría falta además un índice ciego (HMAC); mismo costo, sin beneficio hoy. |
 
@@ -214,16 +219,19 @@ Se hace más fácil:
   que tocar Render, código ni la base.
 - Saber quién es cada oficial: el catálogo es el único lugar, y el LDAP
   manda sobre quién pertenece.
-- Cortar el acceso de quien sale del LDAP sin mover casos por sorpresa.
+- Cortar el acceso de quien sale del LDAP sin depender de otro grupo:
+  lo corta el propio LDAP, y la baja manual lo corta en el acto.
+- No mover casos por sorpresa.
 - Reasignar en un paso un caso trabado, en cualquier estado en curso.
 - Auditar: el historial dice qué dispatcher reasignó, desde qué oficial
   y por qué.
 
 Se hace más difícil o cuesta:
 
-- Dependemos del Grupo 2 para el evento de baja o el endpoint de listado.
-  Hasta que exista alguno, la única señal automática es el login sin
-  `poli`, y una baja puede tardar en reflejarse.
+- El catálogo no se entera solo de quien fue borrado del LDAP: hasta que
+  el dispatcher lo marca, ese oficial sigue figurando como asignable y
+  sus casos no aparecen marcados.
+- El dispatcher suma una tarea: dar de baja oficiales en `/ops/oficiales`.
 - Un oficial aparece en el catálogo recién después de su primer login: el
   dispatcher no puede asignar a alguien que nunca entró.
 - Sin el claim `name`, el catálogo muestra el usuario (`of.gorgory`) en
@@ -238,13 +246,13 @@ Se hace más difícil o cuesta:
 - El front suma la marca en el tablero y la acción de reasignar.
 - `authenticate` pasa a consultar la base para los oficiales federados
   (mitigado con caché).
-- Hay que mantener un listener nuevo y, si existe la API, un job.
 
 Neutras:
 
 - Los oficiales demo (`of-001`…`of-010`) siguen igual para las cuentas
   locales, en la misma tabla.
-- El front no cambia: sigue usando `GET /api/officers` y el id `of-0XX`.
+- El front sigue usando `GET /api/officers` y el id `of-0XX`; solo suma
+  la marca, la baja manual y la reasignación.
 
 ### No esperadas (riesgos a vigilar)
 
@@ -252,11 +260,20 @@ Neutras:
   con un oficial sin acceso durante mucho tiempo, sin que nadie avance.
   Mitigación a evaluar: alerta si un caso marcado sigue sin reasignar
   pasados N minutos.
+- **Oficial fantasma:** alguien borrado del LDAP sigue `disponible` en el
+  catálogo hasta la baja manual. El dispatcher puede asignarle un caso
+  nuevo que nadie va a atender. Mitigación a evaluar: mostrar
+  `last_seen_at` en el catálogo y en el modal de asignar, y avisar si el
+  oficial no aparece hace más de un turno (solo aviso, sin baja
+  automática).
 - **Baja masiva por error del LDAP:** si alguien quita por error el grupo
-  `poli` (o el evento llega mal), todos los oficiales pierden el acceso a
-  la vez y el tablero se llena de casos marcados. Los casos no se mueven,
-  pero nadie puede actualizarlos hasta que el LDAP se corrija o el
-  dispatcher reasigne.
+  `poli`, todos los oficiales pierden el acceso a la vez y, a medida que
+  entran, se van marcando. Los casos no se mueven, pero nadie puede
+  actualizarlos hasta que el LDAP se corrija (y se reactivan solos al
+  volver a entrar) o el dispatcher reasigne.
+- **Baja manual equivocada:** el dispatcher marca al oficial equivocado.
+  Queda auditado y se revierte a mano, pero mientras tanto esa persona
+  recibe 403.
 - **Oficial en el lugar sin acceso:** un oficial `ON_SCENE` dado de baja
   sigue físicamente en el lugar pero ya no puede marcar "resuelta". El
   dispatcher tiene que coordinar por otra vía antes de reasignar, para no
@@ -276,24 +293,19 @@ Neutras:
 - **Caché desactualizada con varias instancias:** con más de un proceso,
   uno puede seguir aceptando a un oficial ya dado de baja hasta que vence
   su caché. Hoy hay una sola instancia en Render; el TTL acota la ventana.
-- **Eventos duplicados o fuera de orden:** una baja que llega dos veces o
-  después de una realta no puede volver a dejar sin acceso a quien ya fue reactivado. El listener
-  tiene que ser idempotente (como los actuales, con
-  `eventos_procesados`) y comparar fechas.
 - **Catálogo que crece:** cada `poli` que entra una vez queda en la tabla.
   Los dados de baja no se borran (por el historial), solo se ocultan.
-- **Ventana de 15 minutos** entre la baja en el LDAP y que nos enteremos,
-  si no hay evento: el token viejo sigue sirviendo hasta que llega alguna
-  señal.
+- **Ventana de 15 minutos** después de la baja en el LDAP: el token viejo
+  sigue sirviendo hasta que vence, salvo que el dispatcher haga la baja
+  manual antes.
 - **Experiencia del oficial dado de baja:** pasa de golpe a recibir 403;
   el front tiene que mostrarlo y cerrarle la sesión en vez de reintentar.
 
 ### Pendientes para pasar a `aceptada`
 
-1. Pedir al Grupo 2: evento de baja (o cambio de grupo), endpoint que
-   liste los usuarios de `poli`, claim `name` (y chapa si la tienen), y
-   confirmar que el refresh rechaza usuarios dados de baja y que no
-   reutilizan `sub`.
+1. Confirmar con el Grupo 2 que el refresh rechaza a los usuarios dados
+   de baja y que no reutilizan `sub`, y pedir el claim `name` (y chapa si
+   la tienen). El evento de baja y el listado quedan fuera por este año.
 2. Confirmar con Producto la reasignación desde `EN_ROUTE`/`ON_SCENE` y
    cuánto tiempo puede quedar un caso marcado antes de alertar.
 3. Confirmar con Security que el vínculo puede guardarse en claro.
@@ -304,7 +316,6 @@ Neutras:
 
 - [Usar identidad local con JWT y sacar la PII del navegador](usar-identidad-local-con-jwt.md)
 - [Autorizar por JWT con ownership y endurecer el perímetro HTTP](autorizar-por-jwt-con-ownership-y-endurecer-el-perimetro-http.md)
-- [Consumir eventos externos con un listener y reglas por evento](consumir-eventos-externos-con-un-listener-y-reglas-por-evento.md)
 - [Cifrar ubicación y PII sensible en reposo](cifrar-ubicacion-y-pii-sensible-en-reposo.md)
 
 ## Historial
@@ -313,3 +324,6 @@ Neutras:
 - 2026-11-15: la baja deja de desasignar los casos automáticamente; los
   marca y el dispatcher los reasigna en un paso (también desde
   `EN_ROUTE`/`ON_SCENE`).
+- 2026-11-15: el Grupo 2 confirma que este año no publica evento de baja
+  ni listado de `poli`. Se descartan esas dos vías y se suma la baja
+  manual del dispatcher.
