@@ -314,8 +314,8 @@ Neutras:
   reasignarlo. Hasta el issue aparte, se coordina por fuera del sistema.
 - **Cuenta demo y persona real comparten oficial:** `of-001` también es
   una cuenta demo local (atajo de login). Con el vínculo, `of.gorgory` y
-  ese atajo operan como el mismo oficial; conviene sacar `of-001` de los
-  atajos demo.
+  ese atajo operan como el mismo oficial. Los logins demo quedan fuera de
+  este ADR y se tratan en un issue aparte.
 - **Reasignar a quien vuelve:** si el LDAP lo reactiva justo mientras el
   dispatcher reasigna, la acción tiene que fallar limpia (409: el oficial
   asignado ya está activo) en vez de pisar el caso.
@@ -338,15 +338,18 @@ Neutras:
 
 ### Pendientes para pasar a `aceptada`
 
-1. Pedir al Grupo 2 el claim `name`. El `sub`, la chapa y el refresh ya
-   están definidos; el evento de baja y el listado quedan fuera por este
-   año.
-2. Definir cuánto tiempo puede quedar un caso marcado antes de alertar.
-3. Que el IdP acepte el login de `of.gorgory` para precargar su `sub` en
+1. Definir cuánto tiempo puede quedar un caso marcado antes de alertar.
+2. Que el IdP acepte el login de `of.gorgory` para precargar su `sub` en
    `of-001`.
 
-Fuera de este ADR: issue aparte para reasignar casos `EN_ROUTE`/`ON_SCENE`
-de un oficial dado de baja.
+Postergado: pedir al Grupo 2 el claim `name` (mientras tanto, un oficial
+nuevo figura con su usuario).
+
+Fuera de este ADR, en issues aparte:
+
+- reasignar casos `EN_ROUTE`/`ON_SCENE` de un oficial dado de baja;
+- los logins demo (atajos locales como `of-001`) frente a los oficiales
+  del LDAP.
 
 ## Relacionados
 
@@ -375,3 +378,5 @@ de un oficial dado de baja.
   el `sub` se guarda en claro; la reasignación desde `EN_ROUTE`/`ON_SCENE`
   sale de este ADR y va a un issue aparte; `of.gorgory` se vincula a
   `of-001`, el oficial con más casos asignados.
+- 2026-11-15: el claim `name` se posterga y los logins demo pasan a un
+  issue aparte.
