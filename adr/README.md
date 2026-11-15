@@ -29,6 +29,7 @@ Para regenerarlo: `tools/adr index`
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | aceptada | 2026-08-27 |
 | [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | reemplazada | 2026-08-27 |
 | [Usar SonarCloud como análisis estático complementario](usar-sonarcloud-como-analisis-complementario.md) | aceptada | 2026-09-24 |
+| [Vincular los oficiales del LDAP al catálogo de oficiales](vincular-los-oficiales-del-ldap-al-catalogo-de-oficiales.md) | propuesta | 2026-11-15 |
 
 Para crear un ADR nuevo: `tools/adr new "<título>"` — ver el
 [README principal](../README.md) para el flujo de trabajo completo.
