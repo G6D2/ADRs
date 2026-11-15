@@ -44,7 +44,7 @@ Fuerzas en juego:
    configuración.
 3. **Bajas efectivas.** Si alguien sale del LDAP (o del grupo `poli`),
    tiene que perder el acceso, y el dispatcher tiene que poder reasignar
-   sus casos a otro oficial, en cualquier estado en curso. Un caso no
+   sus casos a otro oficial. Un caso no
    puede quedar trabado en manos de alguien que ya no es oficial.
 4. **No hay ni habrá este año un canal de bajas.** Nos enteramos de quién
    es alguien solo cuando nos manda un token. Alguien que salió del LDAP
@@ -86,7 +86,9 @@ Una migración agrega a `officers`:
   del LDAP, única clave de vínculo;
 - `active BOOLEAN NOT NULL DEFAULT true` y `deactivated_at TIMESTAMPTZ`;
 - `last_seen_at TIMESTAMPTZ`;
-- `badge_number` pasa a ser opcional (el token no la trae).
+- `badge_number` de los oficiales del LDAP es su `sub` (`U000042`): el
+  token no trae chapa y el `employeeNumber` ya es el número único de la
+  persona. Los oficiales demo locales conservan la suya.
 
 `IDP_SUB_ALIASES` se elimina: el vínculo vive en la base.
 
@@ -98,7 +100,7 @@ resuelve el oficial en este orden:
 1. **Ya vinculado:** fila con `idp_sub` = `sub` del token.
 2. **Nuevo:** se crea una fila con el siguiente id libre (`of-011`…),
    nombre = `preferred_username` (o el claim `name` si el Grupo 2 lo
-   agrega), sin chapa y en `disponible`.
+   agrega), `badge_number` = `sub` y en `disponible`.
 
 La resolución es un único `INSERT … ON CONFLICT (idp_sub)` dentro de una
 transacción, así dos logins simultáneos no crean dos filas. El resultado
@@ -110,8 +112,15 @@ rate limit no cambian. Se actualiza `last_seen_at`.
 **El vínculo usa solo el `sub`.** No se vincula por nombre, usuario ni
 mail. Para que una persona del LDAP sea un oficial que **ya existe** en
 el catálogo, se le carga su `sub` en `idp_sub` antes de su primer login
-(migración o acción del dispatcher); al entrar cae en el paso 1. El
-`sub` se ve en el panel del Login Federado (es el `employeeNumber`).
+(migración o acción del dispatcher) y su `badge_number` pasa a ser ese
+`sub`; conserva su id, su nombre y su historial, y al entrar cae en el
+paso 1. El `sub` se ve en el panel del Login Federado (es el
+`employeeNumber`).
+
+**Primer vínculo:** `of.gorgory` se vincula a `of-001` (Oficial Carlos
+Gómez), el oficial con más casos asignados (9 de 182 emergencias al
+15/11/2026, todas resueltas o cerradas). Se precarga su `sub` cuando su
+login funcione (hoy el IdP rechaza sus credenciales).
 
 ### 3. Bajas: el acceso lo corta el LDAP, el catálogo lo marcamos nosotros
 
@@ -163,7 +172,7 @@ Por estado:
 | Estado | Qué puede hacer el dispatcher |
 |---|---|
 | `DISPATCHED` | Reasignar (queda `DISPATCHED` con el oficial nuevo). También sirve el camino actual: devolver a `VALIDATED` y asignar. |
-| `EN_ROUTE`, `ON_SCENE` | Reasignar: vuelve a `DISPATCHED` con el oficial nuevo, que arranca desde "en camino". Es una **transición nueva**, solo para el dispatcher y solo con el oficial asignado inactivo. |
+| `EN_ROUTE`, `ON_SCENE` | **Fuera de alcance de este ADR.** Quedan marcadas pero no se pueden reasignar todavía; se resuelve en un issue aparte (ver Pendientes). |
 | `RESOLVED` | Nada que reasignar: el trabajo está hecho y el dispatcher la cierra. |
 
 La reasignación es una transacción: cambia `assigned_officer_id`, deja la
@@ -185,7 +194,7 @@ dispatcher, para que una decisión explícita no se pise sola.
 - **La baja manual** queda protegida como cualquier acción del
   dispatcher: token verificado, grupo `dispatcher` y registro de quién y
   por qué.
-- **No se hashea el vínculo** (`idp_sub`): ver
+- **El `sub` se guarda en claro** (`idp_sub` y `badge_number`): ver
   alternativas descartadas.
 
 ## Alternativas consideradas
@@ -218,10 +227,11 @@ dispatcher, para que una decisión explícita no se pise sola.
 
 | Alternativa | Decisión | Motivo |
 |---|---|---|
-| Marcar los casos y que el dispatcher los reasigne en un paso, en `DISPATCHED`, `EN_ROUTE` u `ON_SCENE` (elegida) | **Se hace** | Una persona decide con contexto (puede haber alguien en el lugar); una baja errónea del LDAP no desarma la operación en curso; la reasignación queda auditada con el dispatcher como actor. |
+| Marcar los casos y que el dispatcher reasigne en un paso los `DISPATCHED` (elegida) | **Se hace** | Una persona decide con contexto (puede haber alguien en el lugar); una baja errónea del LDAP no desarma la operación en curso; la reasignación queda auditada con el dispatcher como actor. |
 | Devolver todo a `VALIDATED` automáticamente, con actor `system` | Descartada | Una baja errónea desasignaría todos los casos en curso de golpe, y un caso `ON_SCENE` volvería a la cola con alguien todavía en el lugar. |
 | Devolver solo `DISPATCHED` automáticamente | Descartada | Los casos en curso quedarían con un oficial que ya no puede actualizarlos y sin forma de reasignarlos. |
-| Reasignar en dos pasos (devolver a `VALIDATED` y asignar) | Descartada para `EN_ROUTE`/`ON_SCENE` | Hoy la devolución solo existe desde `DISPATCHED`; abrirla desde otros estados para cualquier caso es más amplio que lo necesario. Para `DISPATCHED` sigue disponible. |
+| Reasignar también desde `EN_ROUTE`/`ON_SCENE` | Postergada | Cambia la máquina de estados y el contrato del bus; se trata en un issue aparte. |
+| Reasignar en dos pasos (devolver a `VALIDATED` y asignar) | Se mantiene para `DISPATCHED` | Es el camino que ya existe; la reasignación en un paso lo complementa. |
 | Cancelar los casos | Descartada | La emergencia sigue existiendo: hay que reasignarla, no cerrarla. |
 
 ### Criptografía
@@ -229,7 +239,7 @@ dispatcher, para que una decisión explícita no se pise sola.
 | Alternativa | Decisión | Motivo |
 |---|---|---|
 | Verificar RS256 contra el JWKS (ya existe) | **Se mantiene** | Garantiza la autenticidad del grupo. |
-| Guardar `idp_sub` como HMAC con clave | Descartada por ahora | El `sub` ya es opaco y el catálogo guarda el nombre en claro; el hash impide leer el vínculo para depurar. Se revisa si Security clasifica estos identificadores como PII (se haría con una clave gestionada como `LOCATION_ENCRYPTION_KEY`). |
+| Guardar `idp_sub` como HMAC con clave | Descartada | Se decidió guardar el `sub` en claro (15/11/2026): es un número opaco, además es la chapa visible, y el hash impediría leer el vínculo para depurar. |
 | Cifrar el vínculo con AES | Descartada | Para buscar por el valor haría falta además un índice ciego (HMAC); mismo costo, sin beneficio hoy. |
 
 ## Consecuencias
@@ -245,7 +255,7 @@ Se hace más fácil:
 - Cortar el acceso de quien sale del LDAP sin depender de otro grupo:
   lo corta el propio LDAP, y la baja manual lo corta en el acto.
 - No mover casos por sorpresa.
-- Reasignar en un paso un caso trabado, en cualquier estado en curso.
+- Reasignar en un paso un caso `DISPATCHED` de un oficial dado de baja.
 - Auditar: el historial dice qué dispatcher reasignó, desde qué oficial
   y por qué.
 
@@ -257,12 +267,13 @@ Se hace más difícil o cuesta:
 - El dispatcher suma una tarea: dar de baja oficiales en `/ops/oficiales`.
 - Un oficial aparece en el catálogo recién después de su primer login: el
   dispatcher no puede asignar a alguien que nunca entró.
-- Sin el claim `name`, el catálogo muestra el usuario (`of.gorgory`) en
-  vez del nombre; sin chapa, la columna queda vacía.
-- Cambia la máquina de estados (transición nueva `EN_ROUTE`/`ON_SCENE` →
-  `DISPATCHED`, solo para el dispatcher y solo con el oficial asignado
-  inactivo) y, con ella, lo que ven los consumidores de
-  `EmergenciaActualizada`.
+- Sin el claim `name`, un oficial nuevo figura con su usuario
+  (`of.gorgory`) en vez del nombre. La chapa muestra el `sub`, que no es
+  un número de chapa policial real.
+- La máquina de estados no cambia en este ADR: la reasignación cubre
+  solo `DISPATCHED`. Los casos `EN_ROUTE`/`ON_SCENE` de un oficial dado
+  de baja quedan marcados y trabados hasta que se resuelva el issue
+  aparte.
 - Los casos del oficial dado de baja quedan quietos hasta que el
   dispatcher actúa: la reasignación depende de que alguien mire el
   tablero.
@@ -298,13 +309,13 @@ Neutras:
 - **Baja manual equivocada:** el dispatcher marca al oficial equivocado.
   Queda auditado y se revierte a mano, pero mientras tanto esa persona
   recibe 403.
-- **Oficial en el lugar sin acceso:** un oficial `ON_SCENE` dado de baja
-  sigue físicamente en el lugar pero ya no puede marcar "resuelta". El
-  dispatcher tiene que coordinar por otra vía antes de reasignar, para no
-  mandar a un segundo oficial sin saberlo.
-- **Consumidores del bus que no esperan ir hacia atrás:** otros módulos
-  pueden asumir que después de `EN_CAMINO` no viene `DESPACHADA`. Hay que
-  avisarlo como cambio de contrato.
+- **Casos en curso trabados:** un oficial `EN_ROUTE` u `ON_SCENE` dado de
+  baja ya no puede avanzar el caso y el dispatcher todavía no puede
+  reasignarlo. Hasta el issue aparte, se coordina por fuera del sistema.
+- **Cuenta demo y persona real comparten oficial:** `of-001` también es
+  una cuenta demo local (atajo de login). Con el vínculo, `of.gorgory` y
+  ese atajo operan como el mismo oficial; conviene sacar `of-001` de los
+  atajos demo.
 - **Reasignar a quien vuelve:** si el LDAP lo reactiva justo mientras el
   dispatcher reasigna, la acción tiene que fallar limpia (409: el oficial
   asignado ya está activo) en vez de pisar el caso.
@@ -327,14 +338,15 @@ Neutras:
 
 ### Pendientes para pasar a `aceptada`
 
-1. Pedir al Grupo 2 el claim `name` (y chapa si la tienen). El `sub` y
-   el refresh ya están confirmados; el evento de baja y el listado quedan
-   fuera por este año.
-2. Confirmar con Producto la reasignación desde `EN_ROUTE`/`ON_SCENE` y
-   cuánto tiempo puede quedar un caso marcado antes de alertar.
-3. Confirmar con Security que el vínculo puede guardarse en claro.
-4. Definir si `of.gorgory` es un oficial nuevo o se le precarga su `sub`
-   a uno de los existentes.
+1. Pedir al Grupo 2 el claim `name`. El `sub`, la chapa y el refresh ya
+   están definidos; el evento de baja y el listado quedan fuera por este
+   año.
+2. Definir cuánto tiempo puede quedar un caso marcado antes de alertar.
+3. Que el IdP acepte el login de `of.gorgory` para precargar su `sub` en
+   `of-001`.
+
+Fuera de este ADR: issue aparte para reasignar casos `EN_ROUTE`/`ON_SCENE`
+de un oficial dado de baja.
 
 ## Relacionados
 
@@ -359,3 +371,7 @@ Neutras:
   único y nunca reutilizado, y pide usarlo como clave. Se elimina la
   reserva por usuario (`ldap_username`): un oficial existente se vincula
   precargando su `sub`.
+- 2026-11-15: decisiones: la chapa de los oficiales del LDAP es su `sub`;
+  el `sub` se guarda en claro; la reasignación desde `EN_ROUTE`/`ON_SCENE`
+  sale de este ADR y va a un issue aparte; `of.gorgory` se vincula a
+  `of-001`, el oficial con más casos asignados.
