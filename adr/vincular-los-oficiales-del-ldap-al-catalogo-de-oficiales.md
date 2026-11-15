@@ -181,7 +181,7 @@ los recupera.
 | Evento del Grupo 2 en el bus | **Se hace** (depende del Grupo 2) | Llega en segundos y reutiliza la infraestructura de listeners. |
 | Reconciliación periódica contra una API del Grupo 2 | **Se hace como respaldo** (depende del Grupo 2) | Cubre eventos perdidos o la ausencia de eventos. |
 | Detectar el login sin `poli` | **Se hace** | Gratis, aunque llega tarde. |
-| Dar de baja por inactividad (N horas sin entrar) | Descartada | No distingue a alguien dado de baja de alguien que no está de turno: desasignaría oficiales activos. `last_seen_at` queda solo como dato informativo. |
+| Dar de baja por inactividad (N horas sin entrar) | Descartada | No distingue a alguien dado de baja de alguien que no está de turno: le cortaría el acceso a oficiales activos. `last_seen_at` queda solo como dato informativo. |
 | Introspección del token en cada request | Descartada | Agrega un llamado al IdP por request (latencia y dependencia en línea) para achicar una ventana de 15 minutos que la baja en el catálogo ya cierra apenas nos enteramos. |
 | Aceptar que el token venza solo, sin baja en el catálogo | Descartada | El oficial seguiría en el catálogo asignable y sus casos quedarían colgados. |
 
@@ -200,7 +200,7 @@ los recupera.
 | Alternativa | Decisión | Motivo |
 |---|---|---|
 | Verificar RS256 contra el JWKS (ya existe) | **Se mantiene** | Garantiza la autenticidad del grupo. |
-| Exigir autenticación del evento de baja | **Se hace** | Evita desasignaciones forjadas. |
+| Exigir autenticación del evento de baja | **Se hace** | Evita bajas forjadas que dejen a los oficiales sin acceso. |
 | Guardar `idp_sub`/`ldap_username` como HMAC con clave | Descartada por ahora | El `sub` ya es opaco y el catálogo guarda el nombre en claro; el hash impide leer el vínculo para depurar. Se revisa si Security clasifica estos identificadores como PII (se haría con una clave gestionada como `LOCATION_ENCRYPTION_KEY`). |
 | Cifrar el vínculo con AES | Descartada | Para buscar por el valor haría falta además un índice ciego (HMAC); mismo costo, sin beneficio hoy. |
 
@@ -277,7 +277,7 @@ Neutras:
   uno puede seguir aceptando a un oficial ya dado de baja hasta que vence
   su caché. Hoy hay una sola instancia en Render; el TTL acota la ventana.
 - **Eventos duplicados o fuera de orden:** una baja que llega dos veces o
-  después de una realta no puede desasignar casos nuevos. El listener
+  después de una realta no puede volver a dejar sin acceso a quien ya fue reactivado. El listener
   tiene que ser idempotente (como los actuales, con
   `eventos_procesados`) y comparar fechas.
 - **Catálogo que crece:** cada `poli` que entra una vez queda en la tabla.
