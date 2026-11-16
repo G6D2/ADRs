@@ -98,14 +98,17 @@ Cuando llega un token federado con grupo de oficial, `authenticate`
 resuelve el oficial en este orden:
 
 1. **Ya vinculado:** fila con `idp_sub` = `sub` del token.
-2. **Nuevo:** se crea una fila con el siguiente id libre (`of-011`…),
-   nombre = `preferred_username` (o el claim `name` si el Grupo 2 lo
-   agrega), `badge_number` = `sub` y en `disponible`.
+2. **Nuevo:** se crea una fila con id `of-` + un UUID v4 generado por la
+   base (`'of-' || gen_random_uuid()`), nombre = `preferred_username` (o
+   el claim `name` si el Grupo 2 lo agrega), `badge_number` = `sub` y en
+   `disponible`.
 
 La resolución es un único `INSERT … ON CONFLICT (idp_sub)` dentro de una
-transacción, así dos logins simultáneos no crean dos filas. El resultado
+transacción: dos logins simultáneos de la misma persona no crean dos
+filas, y dos personas nuevas a la vez no chocan por el id, porque el UUID
+no depende de las filas que ya existen. El resultado
 se cachea en memoria por proceso con un TTL corto. Desde ahí el request
-opera con el id del catálogo (`of-0XX`), igual que hoy con el alias: el
+opera con el id del catálogo (`of-0XX` o `of-<uuid>`), igual que hoy con el alias: el
 chequeo de oficial asignado, el `actor` del historial, los eventos y el
 rate limit no cambian. Se actualiza `last_seen_at`.
 
@@ -211,6 +214,10 @@ dispatcher, para que una decisión explícita no se pise sola.
 | Vincular o reservar por usuario (`preferred_username`) o mail | Descartada | El Grupo 2 pide no usarlos como clave: pueden cambiar, y un usuario reasignado a otra persona heredaría una reserva ajena. Para vincular a un oficial existente se precarga su `sub`. |
 | Vincular por nombre (fuzzy o exacto) | Descartada | Homónimos y variantes de acentos; un usuario creado con el nombre de otro oficial se quedaría con sus casos e historial. A lo sumo podría ser una sugerencia que confirma una persona; no se implementa ahora. |
 | Usar el `sub` del LDAP como id del oficial (`assigned_officer_id = U000xxx`) | Descartada | Evita la columna de vínculo, pero no permite vincular a un oficial existente, mezcla dos formatos de id en el catálogo y en los eventos, y el espacio de `sub` es compartido con las cuentas locales (`U000042` también es un sub demo). |
+| Id nuevo `of-<uuid>` generado por la base (elegida) | **Se hace** | Sin choques entre altas simultáneas, sin secuencia ni reintentos. |
+| Siguiente id libre (`of-011`…) calculado al insertar | Descartada | Dos personas nuevas que entran a la vez calculan el mismo id y uno de los logins falla. |
+| Secuencia de Postgres (`of-` + `nextval`, con ceros) | Descartada | Mantiene el formato `of-0XX`, pero se prefirió no sumar un objeto de esquema más (decisión del 16/11/2026). |
+| Siguiente id libre con reintento si choca | Descartada | Agrega un bucle de reintentos en el camino del login. |
 | Id derivado del `sub` con un hash (`of-<hash(sub)>`) | Descartada | Sigue sin permitir vincular a uno existente y no ayuda a detectar bajas; solo cambia el formato del id. |
 | Consultar el LDAP directamente desde el backend | Descartada | El LDAP es del Grupo 2 y no está expuesto; el contrato es el token y, a lo sumo, una API suya. |
 
@@ -283,13 +290,18 @@ Se hace más difícil o cuesta:
 - El front suma la marca en el tablero y la acción de reasignar.
 - `authenticate` pasa a consultar la base para los oficiales federados
   (mitigado con caché).
+- Conviven dos formatos de id en el catálogo: `of-0XX` (demo y los
+  vinculados a uno existente) y `of-<uuid>` (oficiales nuevos del LDAP).
+  El id largo aparece en el historial, en `assignedOfficerId` y en los
+  eventos del bus; la interfaz tiene que mostrar nombre y chapa, no el
+  id.
 
 Neutras:
 
 - Los oficiales demo (`of-001`…`of-010`) siguen igual para las cuentas
   locales, en la misma tabla.
-- El front sigue usando `GET /api/officers` y el id `of-0XX`; solo suma
-  la marca, la baja manual y la reasignación.
+- El front sigue usando `GET /api/officers`; solo suma la marca, la baja
+  manual y la reasignación.
 
 ### No esperadas (riesgos a vigilar)
 
@@ -385,3 +397,6 @@ Fuera de este ADR, en issues aparte:
   vincula a `of-001` por `IDP_SUB_ALIASES` hasta implementar el ADR.
 - 2026-11-16: no se agrega alerta por casos marcados sin reasignar; solo
   la marca en el tablero.
+- 2026-11-16: los oficiales nuevos del LDAP reciben id `of-<uuid>`
+  generado por la base, en lugar del siguiente id libre, para que dos
+  altas simultáneas no choquen.
