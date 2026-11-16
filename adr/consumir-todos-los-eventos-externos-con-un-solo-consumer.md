@@ -128,7 +128,8 @@ Neutras:
 
 - **Un tópico lento todavía puede afectar a los demás** si tiene varias
   particiones o si la concurrencia no alcanza: el paralelismo es por
-  partición, no por tópico. Hoy cada tópico tiene una partición.
+  partición, no por tópico. No verificamos cuántas particiones tiene cada
+  tópico en el broker de EDA; hay que confirmarlo.
 - **Un mensaje que falla con error transitorio** se reintenta en su
   partición; con la concurrencia, los demás tópicos siguen. Si el error
   hace caer el consumer entero, se caen todos.
