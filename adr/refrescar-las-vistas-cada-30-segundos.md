@@ -2,7 +2,7 @@
 
 - Estado: propuesta
 - Fecha: 2026-11-16
-- Decisores: (a completar: Producto y el equipo de front)
+- Decisores: @Salterm27 (la propuso y la implementó en el front) y Producto (@juanimoli), que la revisó.
 - Reemplaza a: —
 - Reemplazada por: —
 
@@ -53,6 +53,9 @@ minuto y por pestaña): dispatcher, ciudadano y oficial.
   token.
 - Las acciones del usuario (validar, asignar, cancelar, avanzar estado)
   siguen recargando los datos en el momento, sin esperar al próximo ciclo.
+- Es la medida para el Hito 2. Si se acepta
+  [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md),
+  este polling pasa a ser el respaldo del stream.
 
 ## Alternativas consideradas
 
@@ -123,7 +126,10 @@ Neutras:
 
 - [Adoptar Next.js con App Router y un BFF](adoptar-next-js-con-app-router-y-un-bff.md)
 - [Elegir hosting cloud](elegir-hosting-cloud.md)
+- [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md)
 
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
+- 2026-11-16: revisión de Producto. Se enlaza con el ADR de Server-Sent
+  Events. Sigue en propuesta.
