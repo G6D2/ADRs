@@ -10,6 +10,7 @@ Para regenerarlo: `tools/adr index`
 | [Calcular los recursos requeridos con una tabla de reglas](calcular-los-recursos-requeridos-con-una-tabla-de-reglas.md) | aceptada | 2026-10-16 |
 | [Cifrar ubicación y PII sensible en reposo con AES-256-GCM](cifrar-ubicacion-y-pii-sensible-en-reposo.md) | aceptada | 2026-09-24 |
 | [Consumir eventos externos con un listener y reglas por evento](consumir-eventos-externos-con-un-listener-y-reglas-por-evento.md) | aceptada | 2026-10-16 |
+| [Consumir todos los eventos externos con un solo consumer](consumir-todos-los-eventos-externos-con-un-solo-consumer.md) | propuesta | 2026-11-16 |
 | [Detectar incidentes y priorizar con motor determinístico](detectar-incidentes-y-priorizar-con-motor-deterministico.md) | aceptada | 2026-09-09 |
 | [Elegir base de datos](elegir-base-de-datos.md) | aceptada | 2026-09-07 |
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
