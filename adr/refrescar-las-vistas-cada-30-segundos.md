@@ -34,7 +34,7 @@ Fuerzas en juego:
 
 1. **Tráfico del BFF al backend.** Todos los pedidos salen del servidor
    del front hacia la URL pública del backend en `onrender.com`, que pasa
-   por Cloudflare. El 15/11/2026 Cloudflare empezó a responder ese tramo
+   por Cloudflare. El 15/11/2026 se observó que Cloudflare responde ese tramo
    con un desafío anti-bot ("Just a moment...", HTTP 429), y el tablero
    quedó sin datos. Menos pedidos bajan la exposición a ese bloqueo,
    aunque no lo resuelven.
@@ -141,3 +141,5 @@ Neutras:
   Events. Sigue en propuesta.
 - 2026-11-16: `/mis-alertas` y `/oficial` pasan a `createPoller`; se
   corrige el contexto, que daba por hecho que todas las vistas pausaban.
+- 2026-11-16: el bloqueo de Cloudflare se observó el 15/11; no se sabe
+  desde cuándo ocurre.

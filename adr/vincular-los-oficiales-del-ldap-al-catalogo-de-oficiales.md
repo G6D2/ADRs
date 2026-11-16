@@ -187,7 +187,7 @@ fila en `emergency_status_history` (actor = dispatcher, motivo
 nuevo), marca `ocupado` al oficial nuevo y emite `EmergenciaActualizada`
 en el outbox, como cualquier transición.
 
-Reactivación: si la baja fue **automática** (login sin `poli`) y la
+Reactivación: si la baja fue **automática** (token sin `poli`) y la
 persona vuelve al grupo, al entrar se reactiva la misma fila (mismo
 `idp_sub`) y recupera los casos que todavía no se reasignaron. Si la baja
 fue **manual**, entrar con `poli` no la deshace: la revierte el
@@ -210,7 +210,7 @@ dispatcher, para que una decisión explícita no se pise sola.
 | Alternativa | Decisión | Motivo |
 |---|---|---|
 | Vínculo en `officers` + alta just-in-time (elegida) | **Se hace** | Una sola tabla, sin pasos manuales, por identificador exacto. |
-| Mantener `IDP_SUB_ALIASES` en Render | Descartada | Es una segunda lista que se mantiene a mano y exige un redeploy por cada oficial nuevo. |
+| Mantener `IDP_SUB_ALIASES` en Render | Descartada | Es una segunda lista que se mantiene a mano y exige reiniciar el servicio por cada oficial nuevo. |
 | Vincular o reservar por usuario (`preferred_username`) o mail | Descartada | El Grupo 2 pide no usarlos como clave: pueden cambiar, y un usuario reasignado a otra persona heredaría una reserva ajena. Para vincular a un oficial existente se precarga su `sub`. |
 | Vincular por nombre (fuzzy o exacto) | Descartada | Homónimos y variantes de acentos; un usuario creado con el nombre de otro oficial se quedaría con sus casos e historial. A lo sumo podría ser una sugerencia que confirma una persona; no se implementa ahora. |
 | Usar el `sub` del LDAP como id del oficial (`assigned_officer_id = U000xxx`) | Descartada | Evita la columna de vínculo, pero no permite vincular a un oficial existente, mezcla dos formatos de id en el catálogo y en los eventos, y el espacio de `sub` es compartido con las cuentas locales (`U000042` también es un sub demo). |
@@ -350,6 +350,10 @@ Neutras:
   manual antes.
 - **Experiencia del oficial dado de baja:** pasa de golpe a recibir 403;
   el front tiene que mostrarlo y cerrarle la sesión en vez de reintentar.
+  A quien sacan de `poli`, además, el front lo manda a las pantallas de
+  ciudadano (su token ya no trae grupo de oficial), donde cada pedido
+  también da 403. Hay que mostrarle que perdió el acceso de oficial en
+  vez de una pantalla de ciudadano rota.
 
 ### Pendientes para pasar a `aceptada`
 
@@ -400,3 +404,5 @@ Fuera de este ADR, en issues aparte:
 - 2026-11-16: los oficiales nuevos del LDAP reciben id `of-<uuid>`
   generado por la base, en lugar del siguiente id libre, para que dos
   altas simultáneas no choquen.
+- 2026-11-16: ajustes de redacción (token sin `poli`, reinicio en vez de
+  redeploy) y qué ve un oficial al que sacan de `poli`.
