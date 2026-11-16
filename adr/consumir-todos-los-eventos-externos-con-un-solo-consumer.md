@@ -74,6 +74,11 @@ tipo de evento; no abre conexiones.
   conexiones al broker. Un cambio que abra otra conexión al 9092 (otro
   consumer, un admin, el producer de Kafka) tiene que decir cuántas suma y
   cómo queda frente al límite.
+- La regla la hace cumplir un **test de arquitectura**
+  (`src/tests/architecture/kafka-connections.test.js` en el backend): falla
+  si `new Kafka()`, `.consumer()`, `.producer()`, `.admin()` o
+  `new EventConsumer()` aparecen fuera de su único lugar permitido. Sumar
+  uno es actualizar este ADR y después el test.
 
 ### Migración
 
@@ -94,6 +99,7 @@ tipo de evento; no abre conexiones.
 | Seguir con un consumer por listener | Descartada | 12 conexiones hoy y 2 más por cada listener nuevo; ya supera el límite. |
 | Pedirle a EDA que suba el límite | Complementaria, no alcanza | No toca código, pero cada listener nuevo nos vuelve a acercar al techo, y depende de otro equipo. |
 | Apagar listeners para entrar en 10 | Descartada | Se pierden casos de negocio y queda sin margen para deploys. |
+| `EventConsumer` como singleton | Descartada | Garantiza una instancia por proceso, pero el límite es por IP: durante un deploy hay dos procesos igual. Tampoco frena llamadas directas a `kafka.consumer()`, que fue lo que llevó a 12. Complica los tests. El test de arquitectura cubre los dos casos. |
 | Compartir un solo cluster de kafkajs entre consumers | Descartada | kafkajs no lo permite: cada `consumer()` arma su propio cluster y su pool. |
 | Un consumer por módulo de origen (Espacios, Reclamos, Movilidad) | Descartada | 6 conexiones hoy y crece con cada módulo nuevo; mezcla el límite técnico con la organización del negocio. |
 
@@ -151,3 +157,4 @@ Neutras:
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
+- 2026-11-16: se suma el test de arquitectura que hace cumplir la regla y se descarta el singleton.
