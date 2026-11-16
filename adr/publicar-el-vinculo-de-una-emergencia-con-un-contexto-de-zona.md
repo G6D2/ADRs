@@ -2,13 +2,14 @@
 
 - Estado: propuesta
 - Fecha: 2026-11-13
-- Decisores: (a confirmar en la revisión del PR; hace falta Security por la ubicación, Analítica como consumidor y el Grupo 1 por el catálogo del bus)
+- Decisores: @Salterm27 (la propuso y la implementó detrás de un flag) y Producto (@juanimoli), que la revisó. Para aceptarla faltan Security (por la ubicación), Analítica (como consumidor) y el Grupo 1 (por el catálogo del bus).
 - Reemplaza a: —
 - Reemplazada por: —
 
 ## Contexto
 
-[Elevar temporalmente la prioridad con contextos de zona](elevar-temporalmente-la-prioridad-con-contextos-de-zona.md)
+[Elevar la prioridad en un radio alrededor del evento](elevar-la-prioridad-en-un-radio-alrededor-del-evento.md),
+que reemplazó a [Elevar temporalmente la prioridad con contextos de zona](elevar-temporalmente-la-prioridad-con-contextos-de-zona.md),
 sube un nivel la prioridad de despacho de las emergencias que se crean
 cerca de un evento en curso (hoy, un evento comunitario de Espacios). En el
 backend eso quedó así:
@@ -20,7 +21,7 @@ backend eso quedó así:
 - La suba no se guarda: `dispatchPriority` y `priorityContext` se calculan
   al leer y solo los ve el dispatcher por HTTP.
 - `EmergenciaPriorizada` es interna: no está en el contrato del bus y el
-  outbox la marca `SKIPPED`. La "Salida" de aquel ADR, que prometía
+  outbox la marca `SKIPPED`. La "Salida" del ADR original de contextos de zona, que prometía
   publicarla al dar de alta o de baja un contexto, no se implementó.
 
 Para el resto de los módulos, el backend publicó una guía
@@ -58,11 +59,10 @@ Fuerzas y restricciones:
   los consumidores tienen que poder distinguir vínculos viejos de nuevos.
 - **Privacidad.** Un vínculo dice "esta emergencia estuvo a menos de 500 m
   de este punto". Por eso el backend lo borra junto con la ubicación al
-  anonimizar (72 h después del cierre, `LOCATION_RETENTION_HOURS`). Para todas las categorías
-  salvo `PANICO` eso es menos preciso que la coordenada de ~100 m que ya
-  publicamos. Para `PANICO`, el ADR de coordenadas tiene pendiente bajar a
-  2 decimales (~1 km): ahí el vínculo daría más precisión que la
-  coordenada.
+  anonimizar (72 h después del cierre, `LOCATION_RETENTION_HOURS`). Eso es menos
+  preciso que la coordenada de ~100 m que ya publicamos para todas las
+  categorías, incluida `PANICO`: el ADR de coordenadas se aceptó con 3
+  decimales para todas.
 - **Catálogo.** Todo tipo de evento nuevo se registra en el gateway del
   Grupo 1, y los contratos de Emergencias se cerraron en
   G6D2/demo-repository#48.
@@ -122,10 +122,11 @@ lugar de pedir a los consumidores que lo recalculen.
    - Aplica la regla del ADR de coordenadas para eventos nuevos con
      ubicación: el vínculo no puede dar más precisión que la coordenada
      publicada.
-   - **[A definir con Security]** Mientras no esté decidida la precisión de
-     `PANICO`, **no se publican vínculos de emergencias `PANICO`**. Si
-     Security confirma 3 decimales para `PANICO`, se publican; si baja a 2,
-     quedan afuera y Analítica lo sabe por este ADR.
+   - Se publican los vínculos de todas las categorías, incluida `PANICO`:
+     el ADR de coordenadas se aceptó con 3 decimales (~100 m) para todas,
+     así que el vínculo no da más precisión que la coordenada. Si esa
+     precisión bajara para alguna categoría, sus vínculos dejan de
+     publicarse.
    - Al anonimizar la ubicación de una emergencia se borran, además del
      vínculo, sus eventos de vínculo que sigan en `outbox_events`. Lo que ya
      salió al bus queda bajo la retención del Grupo 1, igual que las
@@ -168,8 +169,6 @@ lugar de pedir a los consumidores que lo recalculen.
 
 - Un tipo de evento más para registrar en el gateway y mantener compatible
   hacia atrás.
-- Hasta que Security decida, los vínculos de `PANICO` no se publican y el
-  conteo de Analítica no los incluye.
 - La historia anterior a la activación se pierde, salvo los vínculos de
   emergencias abiertas o cerradas hace menos de 72 h.
 - El vínculo es un dato derivado de la ubicación que sale del módulo; una
@@ -179,12 +178,16 @@ lugar de pedir a los consumidores que lo recalculen.
 
 - `EmergenciaCreada`, `EmergenciaActualizada` y `EmergenciaPriorizada` no
   cambian.
-- El ADR de contextos de zona sigue vigente; este reemplaza solo su
-  "Salida", que no se había implementado. Si el equipo prefiere, se puede
-  marcar aquel como reemplazado parcialmente.
+- El ADR de prioridad por radio sigue vigente. Este cubre la "Salida" que
+  prometía el ADR original de contextos de zona y que no se había
+  implementado.
 - El vencimiento por horario de un contexto sigue sin publicar evento; para
   contar vínculos no hace falta.
 
 ## Historial
 
 - 2026-11-13: creación del ADR (estado: propuesta)
+- 2026-11-15: revisión de Producto. Apunta al ADR de prioridad por radio,
+  que reemplazó al de contextos de zona, y saca la excepción de `PANICO`:
+  el ADR de coordenadas se aceptó con 3 decimales para todas las
+  categorías. Sigue en propuesta.
