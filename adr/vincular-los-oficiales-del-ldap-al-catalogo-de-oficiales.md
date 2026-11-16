@@ -295,8 +295,8 @@ Neutras:
 
 - **Casos olvidados:** si nadie mira el tablero, un caso puede quedar
   con un oficial sin acceso durante mucho tiempo, sin que nadie avance.
-  Mitigación a evaluar: alerta si un caso marcado sigue sin reasignar
-  pasados N minutos.
+  Por ahora no hay alerta (decisión del 16/11/2026): el caso solo queda
+  marcado en el tablero.
 - **Oficial fantasma:** alguien borrado, deshabilitado o movido de
   módulo en el LDAP sigue `disponible` en el catálogo hasta la baja
   manual (a quien solo sacan de `poli` lo detecta el token). El dispatcher puede asignarle un caso
@@ -341,7 +341,7 @@ Neutras:
 
 ### Pendientes para pasar a `aceptada`
 
-1. Definir cuánto tiempo puede quedar un caso marcado antes de alertar.
+Ninguno. Queda para la revisión del PR.
 
 Postergado: pedir al Grupo 2 el claim `name` (mientras tanto, un oficial
 nuevo figura con su usuario).
@@ -383,3 +383,5 @@ Fuera de este ADR, en issues aparte:
   issue aparte.
 - 2026-11-16: el login de `jefe.gorgory` funciona (`sub` `U000025`); se
   vincula a `of-001` por `IDP_SUB_ALIASES` hasta implementar el ADR.
+- 2026-11-16: no se agrega alerta por casos marcados sin reasignar; solo
+  la marca en el tablero.
