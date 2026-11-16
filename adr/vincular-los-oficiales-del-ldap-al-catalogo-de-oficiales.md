@@ -12,7 +12,7 @@ Desde el 12/11/2026 el backend corre en `AUTH_MODE=hybrid`: el personal
 entra con el token del Login Federado del Grupo 2 (RS256, verificado
 contra su JWKS) y los ciudadanos con cuenta local. El dispatcher ya entra
 por LDAP. El 15/11/2026 se dio de alta el primer oficial en el LDAP
-(`of.gorgory`) con el grupo `poli`, que el backend y el front ya traducen
+(`jefe.gorgory`) con el grupo `poli`, que el backend y el front ya traducen
 a `officer`.
 
 Falta resolver **qué oficial del catálogo es esa persona**. Hoy:
@@ -24,7 +24,7 @@ Falta resolver **qué oficial del catálogo es esa persona**. Hoy:
 - Las acciones del oficial (`en-route`, `on-scene`, `resolve`) exigen que
   el `sub` del token sea `assigned_officer_id`.
 - El token del LDAP trae `sub`, `preferred_username`
-  (`of.gorgory`) y `groups`. **No** trae nombre completo ni chapa.
+  (`jefe.gorgory`) y `groups`. **No** trae nombre completo ni chapa.
 - El `sub` es el `employeeNumber` del LDAP (formato `U000042`). Según
   el Grupo 2 (15/11/2026): lo genera el sistema, es único globalmente con
   unicidad forzada por el LDAP, y nunca se libera, porque las bajas son
@@ -117,10 +117,13 @@ el catálogo, se le carga su `sub` en `idp_sub` antes de su primer login
 paso 1. El `sub` se ve en el panel del Login Federado (es el
 `employeeNumber`).
 
-**Primer vínculo:** `of.gorgory` se vincula a `of-001` (Oficial Carlos
-Gómez), el oficial con más casos asignados (9 de 182 emergencias al
-15/11/2026, todas resueltas o cerradas). Se precarga su `sub` cuando su
-login funcione (hoy el IdP rechaza sus credenciales).
+**Primer vínculo:** `jefe.gorgory` (`sub` `U000025`, grupo `poli`) se
+vincula a `of-001` (Oficial Carlos Gómez), el oficial con más casos
+asignados (9 de 182 emergencias al 15/11/2026, todas resueltas o
+cerradas). Hasta implementar este ADR, el vínculo va por
+`IDP_SUB_ALIASES={"U000025":"of-001"}` en Render; al implementarlo, la
+migración precarga `idp_sub = 'U000025'` y `badge_number = 'U000025'` en
+`of-001`.
 
 ### 3. Bajas: el acceso lo corta el LDAP, el catálogo lo marcamos nosotros
 
@@ -268,7 +271,7 @@ Se hace más difícil o cuesta:
 - Un oficial aparece en el catálogo recién después de su primer login: el
   dispatcher no puede asignar a alguien que nunca entró.
 - Sin el claim `name`, un oficial nuevo figura con su usuario
-  (`of.gorgory`) en vez del nombre. La chapa muestra el `sub`, que no es
+  (`jefe.gorgory`) en vez del nombre. La chapa muestra el `sub`, que no es
   un número de chapa policial real.
 - La máquina de estados no cambia en este ADR: la reasignación cubre
   solo `DISPATCHED`. Los casos `EN_ROUTE`/`ON_SCENE` de un oficial dado
@@ -313,7 +316,7 @@ Neutras:
   baja ya no puede avanzar el caso y el dispatcher todavía no puede
   reasignarlo. Hasta el issue aparte, se coordina por fuera del sistema.
 - **Cuenta demo y persona real comparten oficial:** `of-001` también es
-  una cuenta demo local (atajo de login). Con el vínculo, `of.gorgory` y
+  una cuenta demo local (atajo de login). Con el vínculo, `jefe.gorgory` y
   ese atajo operan como el mismo oficial. Los logins demo quedan fuera de
   este ADR y se tratan en un issue aparte.
 - **Reasignar a quien vuelve:** si el LDAP lo reactiva justo mientras el
@@ -339,8 +342,6 @@ Neutras:
 ### Pendientes para pasar a `aceptada`
 
 1. Definir cuánto tiempo puede quedar un caso marcado antes de alertar.
-2. Que el IdP acepte el login de `of.gorgory` para precargar su `sub` en
-   `of-001`.
 
 Postergado: pedir al Grupo 2 el claim `name` (mientras tanto, un oficial
 nuevo figura con su usuario).
@@ -376,7 +377,9 @@ Fuera de este ADR, en issues aparte:
   precargando su `sub`.
 - 2026-11-15: decisiones: la chapa de los oficiales del LDAP es su `sub`;
   el `sub` se guarda en claro; la reasignación desde `EN_ROUTE`/`ON_SCENE`
-  sale de este ADR y va a un issue aparte; `of.gorgory` se vincula a
+  sale de este ADR y va a un issue aparte; `jefe.gorgory` se vincula a
   `of-001`, el oficial con más casos asignados.
 - 2026-11-15: el claim `name` se posterga y los logins demo pasan a un
   issue aparte.
+- 2026-11-16: el login de `jefe.gorgory` funciona (`sub` `U000025`); se
+  vincula a `of-001` por `IDP_SUB_ALIASES` hasta implementar el ADR.
