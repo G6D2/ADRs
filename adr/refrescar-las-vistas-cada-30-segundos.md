@@ -2,7 +2,7 @@
 
 - Estado: propuesta
 - Fecha: 2026-11-16
-- Decisores: (a completar: Producto y el equipo de front)
+- Decisores: @Salterm27 (la propuso y la implementó en el front) y Producto (@juanimoli), que la revisó.
 - Reemplaza a: —
 - Reemplazada por: —
 
@@ -59,6 +59,9 @@ minuto y por pestaña): dispatcher, ciudadano y oficial.
   token.
 - Las acciones del usuario (validar, asignar, cancelar, avanzar estado)
   siguen recargando los datos en el momento, sin esperar al próximo ciclo.
+- Es la medida para el Hito 2. Si se acepta
+  [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md),
+  este polling pasa a ser el respaldo del stream.
 
 ## Alternativas consideradas
 
@@ -68,7 +71,7 @@ minuto y por pestaña): dispatcher, ciudadano y oficial.
 | Dejar 15 s / 5 s | Descartada | Es el volumen que estaba en juego cuando apareció el bloqueo de Cloudflare. |
 | Intervalos distintos por vista (p. ej. dispatcher 30 s, ciudadano y oficial 10 s) | Descartada por ahora | Le daría más frescura a quien espera una ayuda, pero con más tráfico. Se puede revisar si 30 s resulta lento en uso real. |
 | 60 s, como dice el ADR de Next.js | Descartada | Un minuto sin ver un pánico nuevo es demasiado para el dispatcher. |
-| Push con SSE o WebSockets | Descartada por ahora | El ADR de Next.js ya la deja para cuando haya instancias que no se duerman; en el plan free de Render el backend se suspende y corta las conexiones. Es la solución de fondo. |
+| Push con SSE o WebSockets | No para el Hito 2 | Es la solución de fondo y se propone aparte en [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md); si se acepta, este polling queda como respaldo. |
 | Pedir los datos desde el navegador directo al backend | Descartada | Saltaría el bloqueo de Cloudflare, pero rompe el diseño del BFF (token en cookie `httpOnly`). |
 | Backoff ante 429 (espaciar los reintentos si el backend o Cloudflare rechazan) | Complementaria, no se hace ahora | Ayudaría a no insistir contra un bloqueo; se puede sumar aparte. |
 
@@ -129,9 +132,12 @@ Neutras:
 
 - [Adoptar Next.js con App Router y un BFF](adoptar-next-js-con-app-router-y-un-bff.md)
 - [Elegir hosting cloud](elegir-hosting-cloud.md)
+- [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md)
 
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
+- 2026-11-16: revisión de Producto. Se enlaza con el ADR de Server-Sent
+  Events. Sigue en propuesta.
 - 2026-11-16: `/mis-alertas` y `/oficial` pasan a `createPoller`; se
   corrige el contexto, que daba por hecho que todas las vistas pausaban.

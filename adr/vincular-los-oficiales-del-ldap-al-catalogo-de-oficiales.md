@@ -2,7 +2,7 @@
 
 - Estado: propuesta
 - Fecha: 2026-11-15
-- Decisores: (a completar: Producto, Security y el delegado del módulo)
+- Decisores: @Salterm27 (la propuso) y Producto (@juanimoli), que la revisó. Para aceptarla faltan Security y el delegado del módulo.
 - Reemplaza a: —
 - Reemplazada por: —
 
