@@ -23,8 +23,12 @@ eran los del código; hasta este cambio eran:
 | Oficial (`/oficial`) | 5 s (`CITIZEN_POLLING_INTERVAL_MS`) | 12 |
 
 Cada refresco es un solo pedido (el tablero pide todos los estados
-abiertos juntos). El polling del dispatcher se pausa con la pestaña
-oculta y no superpone pedidos (`createPoller`).
+abiertos juntos). Las vistas del dispatcher y el detalle de una alerta
+del ciudadano pausan el polling con la pestaña oculta, y las del
+dispatcher no superponen pedidos (`createPoller`). La lista de alertas
+del ciudadano (`/mis-alertas`) y la vista del oficial (`/oficial`)
+usaban un `setInterval` simple: seguían pidiendo con la pestaña oculta y
+podían superponer pedidos mientras el backend despertaba.
 
 Fuerzas en juego:
 
@@ -46,8 +50,10 @@ minuto y por pestaña): dispatcher, ciudadano y oficial.
 
 - `POLLING_INTERVAL_MS` y `CITIZEN_POLLING_INTERVAL_MS` pasan a `30_000`
   (`app/lib/api.js` en G6D2/Frontend).
-- Se mantienen la pausa con la pestaña oculta y la regla de no superponer
-  pedidos.
+- Todas las vistas que se refrescan solas usan `createPoller`: pausan con
+  la pestaña oculta y nunca tienen dos pedidos en vuelo. `/mis-alertas` y
+  `/oficial` se pasan a `createPoller` en la rama
+  `claude/practical-brown-nolkeb` de G6D2/Frontend.
 - **No cambia** el refresco de la sesión (canje del refresh token del
   Login Federado): no es un refresco de datos y depende de la vida del
   token.
@@ -127,3 +133,5 @@ Neutras:
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
+- 2026-11-16: `/mis-alertas` y `/oficial` pasan a `createPoller`; se
+  corrige el contexto, que daba por hecho que todas las vistas pausaban.
