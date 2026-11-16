@@ -22,6 +22,7 @@ Para regenerarlo: `tools/adr index`
 | [Publicar coordenadas aproximadas en claro en los eventos del bus](publicar-coordenadas-aproximadas-en-claro-en-los-eventos-del-bus.md) | aceptada | 2026-11-12 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Publicar el vínculo de una emergencia con un contexto de zona](publicar-el-vinculo-de-una-emergencia-con-un-contexto-de-zona.md) | propuesta | 2026-11-13 |
+| [Refrescar las vistas cada 30 segundos](refrescar-las-vistas-cada-30-segundos.md) | propuesta | 2026-11-16 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
@@ -31,6 +32,7 @@ Para regenerarlo: `tools/adr index`
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | aceptada | 2026-08-27 |
 | [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | reemplazada | 2026-08-27 |
 | [Usar SonarCloud como análisis estático complementario](usar-sonarcloud-como-analisis-complementario.md) | aceptada | 2026-09-24 |
+| [Vincular los oficiales del LDAP al catálogo de oficiales](vincular-los-oficiales-del-ldap-al-catalogo-de-oficiales.md) | propuesta | 2026-11-15 |
 
 Para crear un ADR nuevo: `tools/adr new "<título>"` — ver el
 [README principal](../README.md) para el flujo de trabajo completo.
