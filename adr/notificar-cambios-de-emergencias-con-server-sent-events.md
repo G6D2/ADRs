@@ -2,7 +2,7 @@
 
 - Estado: propuesta
 - Fecha: 2026-11-13
-- Decisores: (a confirmar en la revisión del PR)
+- Decisores: @Salterm27 (la propuso) y Producto (@juanimoli), que la revisó. Se acepta o se descarta después de la demo del 26/11/2026.
 - Reemplaza a: —
 - Reemplazada por: —
 
@@ -76,7 +76,9 @@ Events (SSE)** usados como **señal de invalidación**, pasando por el BFF.
    hace commit, así que nunca se avisa un cambio que no quedó guardado. Cada
    instancia del backend mantiene una conexión `LISTEN` y reparte el aviso a
    sus clientes SSE. Así funciona con varias instancias sin sumar
-   infraestructura.
+   infraestructura. En producción `DATABASE_URL` es la connection string
+   *pooled* de Neon, y por el pooler `LISTEN` no funciona: la conexión
+   dedicada usa la URL directa de Neon, que va en una variable aparte.
 
 3. **El evento no lleva datos de la emergencia.** Cada instancia filtra con
    las mismas reglas que el listado (dispatcher: todo; oficial:
@@ -108,7 +110,9 @@ Events (SSE)** usados como **señal de invalidación**, pasando por el BFF.
    deja una vista desactualizada para siempre.
 
 Se implementa por etapas: primero backend (stream + `NOTIFY`) y la vista del
-oficial, después dispatcher y ciudadano.
+oficial, después dispatcher y ciudadano. No entra en el Hito 2: el freeze es
+el 18/11/2026 y el cambio toca backend, BFF y las tres vistas, así que se
+implementa después de la demo del 26/11/2026.
 
 ## Alternativas consideradas
 
@@ -140,7 +144,10 @@ oficial, después dispatcher y ciudadano.
 - Cada pestaña abierta mantiene una conexión en el BFF y otra en el backend.
   Hay que vigilar el límite de conexiones y la memoria de las instancias.
 - El backend necesita una conexión dedicada de Postgres por instancia para el
-  `LISTEN`, fuera del pool, con reconexión propia.
+  `LISTEN`, fuera del pool, con reconexión propia. Con Neon suma una
+  variable con la URL directa, y hay que verificar qué pasa con esa conexión
+  cuando Neon suspende el cómputo por inactividad (mientras el backend está
+  despierto el outbox consulta cada 5 s, así que no debería suspenderse).
 - Más casos a probar: reconexión, vencimiento del token, pestaña oculta,
   deploy en medio de una sesión.
 - Render corta las conexiones en cada deploy o reinicio; la experiencia
@@ -160,3 +167,6 @@ oficial, después dispatcher y ciudadano.
 ## Historial
 
 - 2026-11-13: creación del ADR (estado: propuesta)
+- 2026-11-15: revisión de Producto. Suma la conexión directa de Neon para
+  el `LISTEN` y deja la implementación para después de la demo del
+  26/11/2026. Sigue en propuesta.
