@@ -1,10 +1,16 @@
 # Informar los recursos requeridos como un campo del cambio de estado
 
-- Estado: aceptada
+- Estado: pospuesta
 - Fecha: 2026-10-16
 - Decisores: @juanimoli (Producto), @Matiamistadi y @luccaperazzo (Back), @valenfiumana (Seguridad)
 - Reemplaza a: —
 - Reemplazada por: —
+
+**Pospuesta (17/11/2026):** se recortó del Hito 2 y no tiene código. El issue
+que la implementaba ([demo-repository#78](https://github.com/G6D2/demo-repository/issues/78))
+se cerró como fuera de alcance, con la decisión de recortes en
+[demo-repository#85](https://github.com/G6D2/demo-repository/issues/85). La decisión no
+cambia: si se retoma después de la demo del 26/11, vuelve a `aceptada`.
 
 ## Contexto
 
@@ -65,3 +71,5 @@ Pendiente de definir:
 - 2026-11-02: se aplica el review del 2026-10-18. Al no haber consumidores, los eventos por recurso pasan a ser un campo del cambio de estado. Se saca el argumento de los permisos por tópico, que el gateway no ofrece, y queda barrio en vez de ubicación exacta. Cambia el título.
 - 2026-11-05: se suma un `EmergenciaActualizada` por cada recurso en `DESPACHADA`, que pide Analítica en su contrato del 2026-10-29.
 - 2026-11-05: cambio de estado: propuesta → aceptada
+- 2026-11-17: cambio de estado: aceptada → pospuesta. Se recortó del Hito 2
+  sin implementar (demo-repository#78 y #85).

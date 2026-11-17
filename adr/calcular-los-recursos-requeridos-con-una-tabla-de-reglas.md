@@ -1,10 +1,16 @@
 # Calcular los recursos requeridos con una tabla de reglas
 
-- Estado: aceptada
+- Estado: pospuesta
 - Fecha: 2026-10-16
 - Decisores: @juanimoli (Producto), @Matiamistadi y @luccaperazzo (Back)
 - Reemplaza a: —
 - Reemplazada por: —
+
+**Pospuesta (17/11/2026):** se recortó del Hito 2 y no tiene código. El issue
+que la implementaba ([demo-repository#78](https://github.com/G6D2/demo-repository/issues/78))
+se cerró como fuera de alcance, con la decisión de recortes en
+[demo-repository#85](https://github.com/G6D2/demo-repository/issues/85). La decisión no
+cambia: si se retoma después de la demo del 26/11, vuelve a `aceptada`.
 
 ## Contexto
 
@@ -65,3 +71,5 @@ Pendiente de definir:
 - 2026-10-16: creación del ADR (estado: propuesta)
 - 2026-11-02: se aplica el review del 2026-10-18: los recursos se calculan al crear y se publican al validar, las reglas reciben tipo y condiciones, y un disparador externo siempre crea una emergencia propia. Con el campo del ADR de recursos, se saca el Template Method y la factory por recurso. Cambia el título.
 - 2026-11-05: cambio de estado: propuesta → aceptada
+- 2026-11-17: cambio de estado: aceptada → pospuesta. Se recortó del Hito 2
+  sin implementar (demo-repository#78 y #85).
