@@ -18,7 +18,7 @@ En producción se acumulaban emergencias de pruebas viejas. La migración V26 de
 
 El PR #97 del backend agregó un job que las termina solas. Se mergeó el 15/11 a las 22:06 (16/11 en UTC) y revierte lo de V26, a pedido de Producto. El 13/11 se había propuesto dejarlo para después de la demo del 26/11; entró antes, con una excepción para las coberturas preventivas.
 
-Cambia lo que ven los otros módulos y no pasó por este registro. Este ADR documenta lo que hace el código y queda en `propuesta` hasta que Producto lo confirme.
+Cambia lo que ven los otros módulos y no pasó por este registro. Este ADR documenta lo que hace el código; Producto lo confirmó el 17/11 (ver las preguntas al final).
 
 Fuerzas en juego:
 
@@ -142,7 +142,7 @@ Neutras:
 
 - [Cifrar ubicación y PII sensible en reposo](cifrar-ubicacion-y-pii-sensible-en-reposo.md)
 - [Publicar coordenadas aproximadas en claro en los eventos del bus](publicar-coordenadas-aproximadas-en-claro-en-los-eventos-del-bus.md)
-- [Programar cobertura preventiva ante eventos y reservas grandes](programar-cobertura-preventiva-ante-eventos-y-reservas-grandes.md) (propuesta en otro PR)
+- [Programar cobertura preventiva ante eventos y reservas grandes](programar-cobertura-preventiva-ante-eventos-y-reservas-grandes.md) (PR #40)
 - [Usar Kafka como bus de eventos](usar-kafka-como-bus-de-eventos.md)
 
 ## Historial
