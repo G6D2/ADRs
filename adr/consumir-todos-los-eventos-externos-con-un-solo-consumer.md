@@ -1,6 +1,6 @@
 # Consumir todos los eventos externos con un solo consumer
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-16
 - Decisores: @Salterm27 (lo implementó en el PR #112 del backend) y Producto (@juanimoli), que sumó la concurrencia configurable en el PR #115.
 - Reemplaza a: —
@@ -201,3 +201,4 @@ Neutras:
 - 2026-11-16: creación del ADR (estado: propuesta)
 - 2026-11-16: se suma el test de arquitectura que hace cumplir la regla y se descarta el singleton.
 - 2026-11-17: se actualiza con lo que pasó después: la concurrencia pasa a `min(cantidad de tópicos, 3)` y se configura con `KAFKA_CONSUMER_CONCURRENCY` (backend #115); el gateway levantó el límite de 10 conexiones por IP (su PR #46) y el contexto lo aclara; la tabla suma `ActividadCreada.v3` y `ReservaCreada` (8 listeners y 8 tópicos); y se agrega la regla de no poner tópico por defecto a un listener nuevo hasta confirmarlo en el catálogo del gateway.
+- 2026-11-17: cambio de estado: propuesta → aceptada
