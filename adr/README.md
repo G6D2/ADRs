@@ -15,7 +15,7 @@ Para regenerarlo: `tools/adr index`
 | [Elegir hosting cloud](elegir-hosting-cloud.md) | aceptada | 2026-08-14 |
 | [Elevar la prioridad en un radio alrededor del evento](elevar-la-prioridad-en-un-radio-alrededor-del-evento.md) | propuesta | 2026-11-12 |
 | [Elevar temporalmente la prioridad con contextos de zona](elevar-temporalmente-la-prioridad-con-contextos-de-zona.md) | reemplazada | 2026-10-08 |
-| [Expirar las emergencias abiertas sin cambios de estado](expirar-las-emergencias-abiertas-sin-cambios-de-estado.md) | propuesta | 2026-11-17 |
+| [Expirar las emergencias abiertas sin cambios de estado](expirar-las-emergencias-abiertas-sin-cambios-de-estado.md) | aceptada | 2026-11-17 |
 | [Guardar el barrio de la emergencia al crearla](guardar-el-barrio-de-la-emergencia-al-crearla.md) | aceptada | 2026-10-16 |
 | [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | aceptada | 2026-10-16 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |

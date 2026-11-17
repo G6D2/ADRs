@@ -1,6 +1,6 @@
 # Expirar las emergencias abiertas sin cambios de estado
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-17
 - Decisores: Producto (@juanimoli), que lo pidió el 12/11 y lo implementó en el PR #97 del backend.
 - Reemplaza a: —
@@ -131,12 +131,12 @@ Neutras:
 
 ### Preguntas abiertas para Producto
 
-- [ ] ¿Expiramos una emergencia con oficial asignado (`DISPATCHED`, `EN_ROUTE`, `ON_SCENE`)? Las opciones son dejarlas afuera, avisarle al dispatcher antes o seguir como está.
-- [ ] ¿Está bien que una `RESOLVED` se cierre sola, o el cierre lo tiene que hacer el dispatcher?
-- [ ] ¿Avisamos antes de expirar, por ejemplo marcándola en el tablero a las 48 h?
-- [ ] ¿El plazo sigue atado a `LOCATION_RETENTION_HOURS` o pasa a tener su propia variable en `render.yaml`?
-- [ ] ¿Las coberturas preventivas sin contexto de zona tienen que contar el plazo desde el fin del evento?
-- [ ] ¿Les avisamos a los otros módulos que pueden llegar cancelaciones del sistema desde `DESPACHADA` en adelante?
+- [x] **Sí, se expira igual: 72 h sin cambios es un caso abandonado, y el oficial queda libre** (Producto, 17/11). ¿Expiramos una emergencia con oficial asignado (`DISPATCHED`, `EN_ROUTE`, `ON_SCENE`)? Las opciones son dejarlas afuera, avisarle al dispatcher antes o seguir como está.
+- [x] **Sí** (Producto, 17/11). ¿Está bien que una `RESOLVED` se cierre sola, o el cierre lo tiene que hacer el dispatcher?
+- [x] **No, queda para después del Hito 2** (Producto, 17/11). ¿Avisamos antes de expirar, por ejemplo marcándola en el tablero a las 48 h?
+- [x] **Sigue atado a `LOCATION_RETENTION_HOURS`** (Producto, 17/11). ¿El plazo sigue atado a `LOCATION_RETENTION_HOURS` o pasa a tener su propia variable en `render.yaml`?
+- [x] ¿Las coberturas preventivas sin contexto de zona tienen que contar el plazo desde el fin del evento? **No por ahora: desde la creación** (Producto, 17/11).
+- [x] **Sí, se avisa en el grupo de integración** (Producto, 17/11). ¿Les avisamos a los otros módulos que pueden llegar cancelaciones del sistema desde `DESPACHADA` en adelante?
 
 ## Relacionados
 
@@ -148,3 +148,4 @@ Neutras:
 ## Historial
 
 - 2026-11-17: creación del ADR (estado: propuesta). Documenta el job de expiración que está en producción desde el PR #97 del backend, que entró sin ADR.
+- 2026-11-17: cambio de estado: propuesta → aceptada
