@@ -1,8 +1,8 @@
 # Elevar la prioridad en un radio alrededor del evento
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-12
-- Decisores: @Salterm27 (lo implementó en el backend). Lo confirma Producto (@juanimoli), que todavía no lo revisó.
+- Decisores: @Salterm27 (lo implementó en el backend) y Producto (@juanimoli), que lo confirmó el 2026-11-13.
 - Reemplaza a: [Elevar temporalmente la prioridad con contextos de zona](elevar-temporalmente-la-prioridad-con-contextos-de-zona.md)
 - Reemplazada por: —
 
@@ -71,10 +71,11 @@ Sin implementar todavía, igual que con el ADR anterior: el alta y la baja de co
 
 ### Preguntas abiertas para Producto
 
-- [ ] ¿Aceptamos que las emergencias anteriores al evento no suban? Si no, hay que medir también al registrar el contexto, lo que obliga a descifrar las emergencias abiertas en ese momento.
-- [ ] ¿500 m es el radio correcto? ¿Hace falta un radio por tipo de evento o por capacidad?
-- [ ] ¿Cómo entra una alerta climática: por barrio, como antes, o con otra forma de zona?
+- [x] ¿Aceptamos que las emergencias anteriores al evento no suban? Si no, hay que medir también al registrar el contexto, lo que obliga a descifrar las emergencias abiertas en ese momento. **Sí, como corre hoy: solo sube lo que se crea con el contexto vigente** (Producto, 17/11).
+- [x] ¿500 m es el radio correcto? ¿Hace falta un radio por tipo de evento o por capacidad? **Sí, 500 m para todos los eventos, como corre hoy; sin radio por tipo ni por capacidad por ahora** (Producto, 17/11).
+- [x] ¿Cómo entra una alerta climática: por barrio, como antes, o con otra forma de zona? **La responde el ADR "Responder a las alertas climáticas de Espacios": un círculo alrededor de cada punto de la alerta, de 1000 m (CRITICA) o 500 m (ALTA)** (Producto, 17/11).
 
 ## Historial
 
 - 2026-11-12: creación del ADR (estado: propuesta). Documenta el cambio que ya está en producción (PR #96 de `emergencias-backend`) y reemplaza al ADR por barrio.
+- 2026-11-13: cambio de estado: propuesta → aceptada
