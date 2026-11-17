@@ -19,6 +19,7 @@ Para regenerarlo: `tools/adr index`
 | [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | aceptada | 2026-10-16 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
 | [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md) | propuesta | 2026-11-13 |
+| [Programar cobertura preventiva ante eventos y reservas grandes](programar-cobertura-preventiva-ante-eventos-y-reservas-grandes.md) | propuesta | 2026-11-17 |
 | [Publicar coordenadas aproximadas en claro en los eventos del bus](publicar-coordenadas-aproximadas-en-claro-en-los-eventos-del-bus.md) | aceptada | 2026-11-12 |
 | [Publicar el registro en GitHub Pages](publicar-el-registro-en-github-pages.md) | aceptada | 2026-08-13 |
 | [Publicar el vínculo de una emergencia con un contexto de zona](publicar-el-vinculo-de-una-emergencia-con-un-contexto-de-zona.md) | propuesta | 2026-11-13 |
