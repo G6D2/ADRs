@@ -1,10 +1,10 @@
 # Usar identidad local con JWT y sacar la PII del navegador
 
-- Estado: aceptada
+- Estado: reemplazada
 - Fecha: 2026-09-24
 - Decisores: @valenfiumana (Security), @juanimoli (Producto)
 - Reemplaza a: —
-- Reemplazada por: —
+- Reemplazada por: [Usar el Login Federado para el personal y cuentas locales para los ciudadanos](usar-el-login-federado-para-el-personal-y-cuentas-locales-para-los-ciudadanos.md)
 
 ## Contexto
 
@@ -104,3 +104,4 @@ Se hace más difícil:
 - 2026-10-21: se pasa a archivo como aceptada, con título en imperativo.
   Se aclara que rige hasta el login federado y se registra el pendiente
   de configuración del login de desarrollo (review del issue).
+- 2026-11-17: aceptada → reemplazada por [Usar el Login Federado para el personal y cuentas locales para los ciudadanos](usar-el-login-federado-para-el-personal-y-cuentas-locales-para-los-ciudadanos.md)

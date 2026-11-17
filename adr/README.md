@@ -27,8 +27,9 @@ Para regenerarlo: `tools/adr index`
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
 | [Responder a las alertas climáticas de Espacios](responder-a-las-alertas-climaticas-de-espacios.md) | propuesta | 2026-11-16 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
+| [Usar el Login Federado para el personal y cuentas locales para los ciudadanos](usar-el-login-federado-para-el-personal-y-cuentas-locales-para-los-ciudadanos.md) | aceptada | 2026-11-17 |
 | [Usar GitHub Actions como plataforma de CI/CD](usar-github-actions-para-ci-cd.md) | aceptada | 2026-09-24 |
-| [Usar identidad local con JWT y sacar la PII del navegador](usar-identidad-local-con-jwt.md) | aceptada | 2026-09-24 |
+| [Usar identidad local con JWT y sacar la PII del navegador](usar-identidad-local-con-jwt.md) | reemplazada | 2026-09-24 |
 | [Usar Kafka como bus de eventos](usar-kafka-como-bus-de-eventos.md) | aceptada | 2026-09-07 |
 | [Usar NodeJS para el backend](usar-nodejs-para-el-backend.md) | aceptada | 2026-08-27 |
 | [Usar ReactJS para el frontend](usar-reactjs-para-el-frontend.md) | reemplazada | 2026-08-27 |
