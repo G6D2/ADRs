@@ -28,7 +28,9 @@ tools/site/                   Assets del sitio de GitHub Pages
   guiones. Ejemplos: `elegir-base-de-datos.md`, `formatear-timestamps.md`,
   `gestionar-contrasenas.md`.
 - **Estados**: `propuesta` → `aceptada` | `rechazada`, y luego
-  `obsoleta` o `reemplazada`.
+  `obsoleta` o `reemplazada`. Una decisión aceptada que se deja para más
+  adelante sin implementarla pasa a `pospuesta`, con una nota al principio
+  que diga desde cuándo y por qué; si se retoma, vuelve a `aceptada`.
 - **Inmutabilidad**: un ADR aceptado no se reescribe. Si la decisión cambia,
   se crea un ADR nuevo que reemplaza al anterior y ambos quedan enlazados.
 
