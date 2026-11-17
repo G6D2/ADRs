@@ -15,7 +15,7 @@ Un evento masivo cambia el riesgo de una zona. El 26/10/2026 Producto eligió **
 
 La segunda no tiene ADR. Entró con el PR #72 del backend (05/11) y creció con el #107 (`ActividadCreada.v3`, 16/11) y el #119 (`ReservaCreada`, 16/11). Lo único que dice el registro es, en el ADR de radio, que una preventiva "no sube".
 
-Este ADR registra lo que corre en `main` al 17/11/2026. Como entró sin pasar por el registro, queda en `propuesta` hasta que Producto lo confirme.
+Este ADR registra lo que corre en `main` al 17/11/2026. Entró sin pasar por el registro; Producto lo confirmó el 17/11 (ver las preguntas al final).
 
 Fuerzas en juego:
 
@@ -156,8 +156,8 @@ Neutras:
 
 - [Elevar la prioridad en un radio alrededor del evento](elevar-la-prioridad-en-un-radio-alrededor-del-evento.md)
 - [Consumir eventos externos con un listener y reglas por evento](consumir-eventos-externos-con-un-listener-y-reglas-por-evento.md)
-- [Consumir todos los eventos externos con un solo consumer](consumir-todos-los-eventos-externos-con-un-solo-consumer.md) (propuesta en otro PR)
-- [Expirar las emergencias abiertas sin cambios de estado](expirar-las-emergencias-abiertas-sin-cambios-de-estado.md) (propuesta en otro PR)
+- [Consumir todos los eventos externos con un solo consumer](consumir-todos-los-eventos-externos-con-un-solo-consumer.md) (PR #42)
+- [Expirar las emergencias abiertas sin cambios de estado](expirar-las-emergencias-abiertas-sin-cambios-de-estado.md) (PR #41)
 - [Publicar coordenadas aproximadas en claro en los eventos del bus](publicar-coordenadas-aproximadas-en-claro-en-los-eventos-del-bus.md)
 
 ## Historial
