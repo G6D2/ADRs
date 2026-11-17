@@ -1,6 +1,6 @@
 # Responder a las alertas climáticas de Espacios
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-16
 - Decisores: @Salterm27 (reglas de negocio e implementación), @KevinAlajarin (redacción). Lo confirma Producto (@juanimoli).
 - Reemplaza a: —
@@ -140,10 +140,12 @@ Neutras:
 
 ### Preguntas para Producto
 
-- [ ] ¿Los radios de 1000 m para `CRITICA` y 500 m para `ALTA` son los correctos?
-- [ ] ¿`ALTA` y `CRITICA` crean una emergencia `PREVENTIVA`, o solo suben la prioridad?
-- [ ] ¿Alcanza con la `PREVENTIVA` como aviso al dispatcher, o hace falta un banner aparte?
+- [x] ¿Los radios de 1000 m para `CRITICA` y 500 m para `ALTA` son los correctos? **Sí** (Producto, 17/11).
+- [x] ¿`ALTA` y `CRITICA` crean una emergencia `PREVENTIVA`, o solo suben la prioridad? **Las dos cosas** (Producto, 17/11).
+- [x] ¿Alcanza con la `PREVENTIVA` como aviso al dispatcher, o hace falta un banner aparte? **Se suma un banner en el front (Frontend #79) que lee `GET /api/contextos-zona/activos` (backend #121). Es solo una vista: no agrega eventos al bus ni cambia la zona, el vínculo ni la suba** (Producto, 17/11).
 
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
+- 2026-11-17: implementado en el backend (PR #122, que retoma el #117) y activo en producción; el front suma un banner de alertas activas (Frontend #79) sobre `GET /api/contextos-zona/activos` (backend #121)
+- 2026-11-17: cambio de estado: propuesta → aceptada
