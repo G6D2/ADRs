@@ -26,6 +26,7 @@ Para regenerarlo: `tools/adr index`
 | [Refrescar las vistas cada 30 segundos](refrescar-las-vistas-cada-30-segundos.md) | propuesta | 2026-11-16 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
+| [Responder a las alertas climáticas de Espacios](responder-a-las-alertas-climaticas-de-espacios.md) | propuesta | 2026-11-16 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
 | [Usar GitHub Actions como plataforma de CI/CD](usar-github-actions-para-ci-cd.md) | aceptada | 2026-09-24 |
 | [Usar identidad local con JWT y sacar la PII del navegador](usar-identidad-local-con-jwt.md) | aceptada | 2026-09-24 |
