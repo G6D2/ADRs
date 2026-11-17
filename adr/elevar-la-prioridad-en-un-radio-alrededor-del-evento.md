@@ -71,9 +71,9 @@ Sin implementar todavía, igual que con el ADR anterior: el alta y la baja de co
 
 ### Preguntas abiertas para Producto
 
-- [ ] ¿Aceptamos que las emergencias anteriores al evento no suban? Si no, hay que medir también al registrar el contexto, lo que obliga a descifrar las emergencias abiertas en ese momento.
-- [ ] ¿500 m es el radio correcto? ¿Hace falta un radio por tipo de evento o por capacidad?
-- [ ] ¿Cómo entra una alerta climática: por barrio, como antes, o con otra forma de zona?
+- [x] ¿Aceptamos que las emergencias anteriores al evento no suban? Si no, hay que medir también al registrar el contexto, lo que obliga a descifrar las emergencias abiertas en ese momento. **Sí, como corre hoy: solo sube lo que se crea con el contexto vigente** (Producto, 17/11).
+- [x] ¿500 m es el radio correcto? ¿Hace falta un radio por tipo de evento o por capacidad? **Sí, 500 m para todos los eventos, como corre hoy; sin radio por tipo ni por capacidad por ahora** (Producto, 17/11).
+- [x] ¿Cómo entra una alerta climática: por barrio, como antes, o con otra forma de zona? **La responde el ADR "Responder a las alertas climáticas de Espacios": un círculo alrededor de cada punto de la alerta, de 1000 m (CRITICA) o 500 m (ALTA)** (Producto, 17/11).
 
 ## Historial
 
