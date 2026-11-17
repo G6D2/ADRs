@@ -6,6 +6,8 @@
 - Reemplaza a: —
 - Reemplazada por: —
 
+**Aviso (17/11/2026):** este texto describe el plan del Hito 1. Cómo se integra hoy el backend con el bus está en la sección «Estado actual (Hito 2, 17/11/2026)», al final.
+
 ## Contexto
 
 CityPass+ se construye con arquitectura orientada a eventos: cada módulo
@@ -103,6 +105,39 @@ Se hace más difícil:
 - La operación del broker queda fuera de nuestro control: un corte del Grupo 1
   se vuelve un corte nuestro.
 
+## Estado actual (Hito 2, 17/11/2026)
+
+Este ADR está aceptado y no se reescribe. Esta sección cuenta cómo se integra hoy el backend con el bus del Grupo 1. La sección «Estado actual (Hito 1)», más abajo, queda como foto del 21/09.
+
+Cómo se integra hoy:
+
+- **Consumo:** lectura directa del broker Kafka del Grupo 1, con SASL_SSL y OAUTHBEARER. Los mensajes llegan en Avro (formato Confluent) y se decodifican contra el Schema Registry del gateway. Hay un solo consumer para todos los listeners (ver [Consumir todos los eventos externos con un solo consumer](consumir-todos-los-eventos-externos-con-un-solo-consumer.md)).
+- **Publicación:** por el outbox, con HTTP al gateway (`POST /api/v1/event-types/{fqn}/events`), con `EDA_PUBLISHER_MODE=gateway` desde el 05/11. El backend manda solo `data` y el gateway sella la `metadata`.
+- **Token:** uno solo, de client credentials del Login Federado (Grupo 2), con el cliente `grupo5`, que lleva el namespace `com.citypass.emergencias`. Lo usan el broker (SASL), el Schema Registry y el gateway. Se renueva 2 minutos antes de vencer.
+
+| Ítem de la decisión | Estado en `main` al 17/11 |
+|---|---|
+| **Kafka a través del gateway del Grupo 1, sin broker propio** | ✅ Se consume del broker del Grupo 1 y se publica por su gateway HTTP. El broker de `docker-compose` queda para desarrollo local. |
+| **Abstracción `EventBus`** | ❌ No se hizo. El bus quedó repartido en cuatro piezas: `KafkaService` (cliente kafkajs con SASL, y el producer del modo `kafka`), `EventConsumer` (el único consumer), `GatewayPublisher` (HTTP) y `OutboxPublisher` (elige el publisher). Los controllers no hablan con el bus: escriben en el outbox. |
+| **Seis eventos con nombre `com.citypass.<namespace>.<EventType>`** | ⚠️ Cambió. Salen dos tipos: `com.citypass.emergencias.EmergenciaCreada` y `com.citypass.emergencias.EmergenciaActualizada` (contrato cerrado en el issue #48 de `demo-repository`, 02/11). El despacho, el cierre y los demás cambios viajan como `EmergenciaActualizada` con su `estadoNuevo`. `EmergenciaPriorizada` se sigue encolando, pero el outbox la marca `SKIPPED` porque es interna. `EmergenciaVinculadaAContextoZona` está detrás de `EVENTO_VINCULO_CONTEXTO_ENABLED`, apagado. El fqn sale del tipo del evento: la columna `topic` del outbox conserva los nombres viejos (`emergencias.boton-panico`, ...), que solo usaría el modo `kafka`. |
+| **Solo `data`; el gateway sella la `metadata`** | ✅ `GatewayPublisher` manda `data` y guarda el `eventId` y el `payloadHash` que devuelve el gateway. |
+| **`correlationId` propio** | ✅ Va en `data.correlationId`. |
+| **Deduplicar por `metadata.eventId`, con tabla de eventos procesados** | ✅ `eventos_procesados`, en la misma transacción que los efectos del evento. No tiene purga. |
+| **Outbox** | ✅ Poll cada 5 s y reintentos con backoff exponencial (hasta 10). Respeta el `Retry-After` de un 429 y marca `FAILED`, sin reintentar, los 400, 403, 404 y 413. Purga los `PUBLISHED` a las 168 h. `OUTBOX_PUBLISH_SINCE` descarta lo anterior a la activación. |
+| **Namespace y credenciales por configuración** | ⚠️ El secreto (`EDA_OAUTH_CLIENT_SECRET`) está en el dashboard de Render. El cliente (`grupo5`) y la URL del token tienen default en el código. El namespace llega en el token, pero también está fijo en el código, en el prefijo del `group.id` y del fqn. |
+| **`KAFKA_ENABLED=false` en Render mientras no haya gateway** | Superado: `KAFKA_ENABLED`, `KAFKA_CONSUMER_ENABLED` y `OUTBOX_PUBLISHER_ENABLED` están en `true`, y `EDA_PUBLISHER_MODE=gateway`. |
+
+**Riesgo de la publicación por HTTP.** El gateway genera un `eventId` en cada `POST` y no acepta `Idempotency-Key`. Si se corta un pedido que el gateway igual publica, el outbox lo reintenta y el evento sale dos veces, con otro `eventId`. El timeout del publisher (45 s) baja la probabilidad. La deduplicación por `eventId` de los consumidores no lo cubre.
+
+**Testing de eventos, hoy:**
+
+- **Unit tests:** `kafkajs` y `fetch` mockeados; el consumer se prueba con un consumer falso.
+- **Integración en CI:** Postgres real. El consumo en Avro se prueba con un Schema Registry HTTP local (`consumer-avro.integration.test.js`). Kafka no corre en CI.
+- **Arquitectura:** un test frena clientes, consumers y producers de Kafka nuevos fuera de su lugar.
+- **Contra el bus real:** no hay pruebas automáticas en CI. Se verifica en producción (`/health`, `GET /api/outbox-events`) y con las suites del repo `BusinessCase_TestBench`.
+
+**Dos puntos de la decisión no se cumplieron como estaban escritos:** la abstracción `EventBus` y los seis eventos. Ninguno tiene un ADR que lo reemplace. Si Producto quiere formalizar esos cambios, corresponde un ADR nuevo con `tools/adr supersede`.
+
 ## Estado actual (Hito 1)
 
 Para evitar interpretaciones erróneas cuando se presenta esta ADR como si ya estuviera implementada: la mayoría de la "Decisión" es todavía plan futuro. Lo que hoy tiene código es:
@@ -131,4 +166,5 @@ Cuando se responda a "¿cómo testean los eventos?" en la presentación, decir: 
 - 2026-09-07: creación del ADR (estado: propuesta)
 - 2026-09-07: cambio de estado: propuesta → aceptada
 - 2026-09-21: agregada sección "Estado actual (Hito 1)" para explicitar qué está implementado vs. planificado (hallazgo #18)
+- 2026-11-17: se agrega la sección «Estado actual (Hito 2, 17/11/2026)» y un aviso al principio. Describe la integración que corre hoy: consumo directo con SASL/OAUTHBEARER y Avro contra el Schema Registry, publicación por el outbox al gateway HTTP (`EDA_PUBLISHER_MODE=gateway`) y dos tipos de evento en vez de seis. El texto aceptado no se modifica.
 
