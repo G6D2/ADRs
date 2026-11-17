@@ -1,6 +1,6 @@
 # Programar cobertura preventiva ante eventos y reservas grandes
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-17
 - Decisores: Producto (@juanimoli). Lo implementaron en el backend @KevinAlajarin (PR #72 y #119) y @Matiamistadi (PR #107).
 - Reemplaza a: —
@@ -146,11 +146,11 @@ Neutras:
 
 ### Preguntas abiertas para Producto
 
-- [ ] ¿500 personas es el umbral correcto para los tres disparadores?
-- [ ] ¿La reserva de un vecino de 500 personas o más lleva cobertura? Hoy no. Si la lleva, hay que consumir `ActividadModificada` para la baja.
-- [ ] ¿Aceptamos que una actividad suspendida no baje su cobertura?
-- [ ] ¿Una cobertura sin contexto de zona tiene que contar el plazo de expiración desde el fin del evento, como las otras? Si nadie las toca y no tienen contexto, las 11 del 16/11 expiran el jueves 19/11 a partir de las 19:31, en horario de clase.
-- [ ] ¿Se arregla el #88 antes de la demo del 26/11 o queda como riesgo aceptado?
+- [x] ¿500 personas es el umbral correcto para los tres disparadores? **Sí, 500 para los tres** (Producto, 17/11).
+- [x] ¿La reserva de un vecino de 500 personas o más lleva cobertura? **No, sigue sin cobertura** (Producto, 17/11). Hoy no. Si la lleva, hay que consumir `ActividadModificada` para la baja.
+- [x] ¿Aceptamos que una actividad suspendida no baje su cobertura? **Sí, como limitación conocida: si hace falta, la descarta el dispatcher** (Producto, 17/11).
+- [x] ¿Una cobertura sin contexto de zona tiene que contar el plazo de expiración desde el fin del evento, como las otras? **No por ahora: cuenta desde la creación, como corre hoy** (Producto, 17/11). Si nadie las toca y no tienen contexto, las 11 del 16/11 expiran el jueves 19/11 a partir de las 19:31, en horario de clase.
+- [x] ¿Se arregla el #88 antes de la demo del 26/11 o queda como riesgo aceptado? **Se arregla antes del 26/11** (Producto, 17/11).
 
 ## Relacionados
 
@@ -163,3 +163,4 @@ Neutras:
 ## Historial
 
 - 2026-11-17: creación del ADR (estado: propuesta). Documenta la cobertura preventiva tal como corre en producción (PR #72, #107 y #119 del backend), que entró sin ADR.
+- 2026-11-17: cambio de estado: propuesta → aceptada
