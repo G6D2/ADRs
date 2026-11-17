@@ -1,6 +1,6 @@
 # Vincular los oficiales del LDAP al catálogo de oficiales
 
-- Estado: propuesta
+- Estado: pospuesta
 - Fecha: 2026-11-15
 - Decisores: @Salterm27 (la propuso) y Producto (@juanimoli), que la revisó. Para aceptarla faltan Security y el delegado del módulo.
 - Reemplaza a: —
@@ -385,3 +385,4 @@ Fuera de este ADR, en issues aparte:
   vincula a `of-001` por `IDP_SUB_ALIASES` hasta implementar el ADR.
 - 2026-11-16: no se agrega alerta por casos marcados sin reasignar; solo
   la marca en el tablero.
+- 2026-11-17: cambio de estado: propuesta → pospuesta (Producto, @juanimoli. En producción corre el puente por alias (`IDP_SUB_ALIASES`), documentado en el ADR del Login Federado; la tabla de vínculo queda para después del Hito 2.)

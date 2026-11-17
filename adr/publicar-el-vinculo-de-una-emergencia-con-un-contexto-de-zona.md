@@ -1,6 +1,6 @@
 # Publicar el vínculo de una emergencia con un contexto de zona
 
-- Estado: propuesta
+- Estado: pospuesta
 - Fecha: 2026-11-13
 - Decisores: @Salterm27 (la propuso y la implementó detrás de un flag) y Producto (@juanimoli), que la revisó. Para aceptarla faltan Security (por la ubicación), Analítica (como consumidor) y el Grupo 1 (por el catálogo del bus).
 - Reemplaza a: —
@@ -191,3 +191,4 @@ lugar de pedir a los consumidores que lo recalculen.
   que reemplazó al de contextos de zona, y saca la excepción de `PANICO`:
   el ADR de coordenadas se aceptó con 3 decimales para todas las
   categorías. Sigue en propuesta.
+- 2026-11-17: cambio de estado: propuesta → pospuesta (Producto, @juanimoli. El código existe (`EmergenciaVinculadaAContextoZona` en `PUBLISHED_TYPES`), pero el evento está apagado en producción y ningún consumidor lo usa todavía; se retoma si un módulo lo necesita.)
