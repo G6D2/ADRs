@@ -37,7 +37,7 @@ Este ADR cierra esas preguntas con las mismas piezas que ya usan los eventos de 
 
 ## Decisión
 
-Vamos a responder a la alerta climática con dos efectos, según el nivel: **subir la prioridad en los barrios de la alerta** y **programar una emergencia preventiva**.
+Vamos a responder a la alerta climática con dos efectos, según el nivel: **subir la prioridad en los barrios de la alerta** y **programar una emergencia preventiva**. Además, **confirmamos por el EDA** cada alerta recibida, de cualquier nivel (punto 5).
 
 ### 1. Zona: un contexto por barrio, con el círculo que cubre el barrio
 
@@ -109,20 +109,27 @@ Una alerta que ya venció cuando llega no crea la emergencia. Pasa, por ejemplo,
 - **Cancela la emergencia preventiva si nadie la despachó** (`PENDING` o `VALIDATED`). Publica `EmergenciaActualizada`. Si ya avanzó, queda como está.
 - **Gana aunque llegue antes que la confirmación.** Deja una marca de baja, y la confirmación tardía no crea contextos.
 
-### 5. Aviso climático
+### 5. Confirmación y aviso climático
 
-No se implementa el evento `ContextoZonaActivado` ni un banner propio:
+**Confirmación por el EDA.** Por cada alerta recibida, de cualquier nivel, Emergencias publica `com.citypass.emergencias.CriticidadClimaticaConfirmada` con `alertaId`, `NivelCriticidad` y `fenomeno`, tal como llegaron. Es el mismo record que publica Residuos (`com.citypass.residuos.CriticidadClimaticaConfirmada`), con `NivelCriticidad` en mayúscula como en ese schema:
+
+- sale por el outbox, en la misma transacción que la emergencia y los contextos de la alerta;
+- una reentrega del mismo evento no la duplica: la frena la deduplicación por `metadata.eventId`;
+- si falta alguno de los tres campos, no se confirma;
+- se enciende con `CONFIRMACION_CLIMA_ENABLED=true`, apagada por defecto, como el evento de vínculo. Si el tipo no estuviera en el catálogo del gateway, cada fila del outbox quedaría `FAILED`.
+
+**Aviso.** No se implementa el evento `ContextoZonaActivado`:
 
 - La alerta ya está en el bus: la publica Espacios para todos los módulos, y ningún módulo pidió un evento nuestro de activación.
 - El vínculo de cada emergencia con la alerta sale por `EmergenciaVinculadaAContextoZona`, con `contextoTipo = ALERTA_CLIMATICA`. Ese evento está definido en [Publicar el vínculo de una emergencia con un contexto de zona](publicar-el-vinculo-de-una-emergencia-con-un-contexto-de-zona.md).
-- Para el dispatcher, el aviso es la emergencia `PREVENTIVA` en el tablero. El motivo de cada suba ya se ve en `priorityContext`, por ejemplo «Alerta climática CRITICA: tormenta fuerte».
+- Para el dispatcher, el aviso es la emergencia `PREVENTIVA` y el banner del tablero, que lee los contextos activos (`GET /api/contextos-zona/activos`). El motivo de cada suba ya se ve en `priorityContext`, por ejemplo «Alerta climática CRITICA: tormenta fuerte».
 
 ### 6. Implementación
 
 Sigue la estructura del ADR de listeners:
 
 - Un paquete `src/listeners/alerta-climatica/` con un listener por evento.
-- **Reglas de la confirmación:** `01-crear-emergencia-climatica` y `02-registrar-contextos-climaticos`.
+- **Reglas de la confirmación:** `01-crear-emergencia-climatica`, `02-registrar-contextos-climaticos` y `03-publicar-confirmacion-clima`.
 - **Reglas de la finalización:** `01-cancelar-emergencia-climatica` y `02-dar-de-baja-contextos-climaticos`.
 - Handlers registrados en el `OutcomeFactory`, en la transacción del evento.
 - Deduplicación por `metadata.eventId`, como el resto de los listeners.
@@ -132,6 +139,8 @@ La base es el código del PR #117 de `emergencias-backend`. Respecto de ese PR c
 La zona por barrio suma tres piezas al código del PR #122: el círculo de cada barrio se calcula una vez desde el catálogo (`zonaDelBarrio` en `src/domain/barrio.js`); cada contexto por barrio guarda `barrios = [su barrio]` (columna de V33, sin migración nueva); y `linkZoneContexts` exige el barrio cuando el contexto lo tiene. Los eventos comunitarios no tienen barrios y no cambian.
 
 El vínculo de las emergencias abiertas (punto 1.1) es `linkOpenEmergenciesToZoneContext` en `EmergencyRepository`, que llama el handler del alta después de cada contexto que aplica. La escritura del vínculo y su evento queda en un solo lugar (`writeZoneContextLinks`), que usan el alta de la emergencia y el alta del contexto.
+
+La confirmación (punto 5) es la regla `03-publicar-confirmacion-clima` y el handler `confirmacion-clima.handler.js`, que la encola en el outbox. `CriticidadClimaticaConfirmada` se suma a los tipos que el publisher manda al gateway.
 
 ## Alternativas consideradas
 
@@ -143,6 +152,7 @@ El vínculo de las emergencias abiertas (punto 1.1) es `linkOpenEmergenciesToZon
 | Solo contextos, sin emergencia preventiva | Menos cambios | El dispatcher no tiene una tarea de despliegue y Analítica no tiene emergencias por evento climático |
 | Contexto por punto con radio por nivel (PR #122) | Un solo valor por nivel. No necesita el catálogo de barrios | La suba se limita a los alrededores de los puntos que consulta Espacios: una emergencia del mismo barrio a 2 km no sube |
 | Círculo que cubre el barrio, sin filtrar por barrio | El mismo vínculo por distancia que un evento | El círculo se pasa a los vecinos: el de Palermo (~3,8 km) sube emergencias de Belgrano, Colegiales, Recoleta y Villa Crespo |
+| Sin confirmación propia (versión anterior de este ADR) | Un tipo menos en el catálogo | Emergencias no deja constancia en el bus de que recibió la alerta, como sí hace Residuos |
 | Vincular solo al crear la emergencia (regla del ADR de radio) | Un solo momento de vínculo. Nunca descifra ubicaciones | Las emergencias abiertas cuando llega la alerta, que son las que ya están bajo la tormenta, no suben |
 | **Círculo que cubre el barrio y filtro por barrio al vincular, con el punto como respaldo, vínculo también de las abiertas al dar de alta, y preventiva para `ALTA` y `CRITICA`** (elegida) | Sube en todo el barrio de la alerta y solo ahí, también en las emergencias que ya estaban abiertas. Reusa contextos, vínculo y coberturas; no descifra nada al leer. Sigue la política por nivel de Espacios | El vínculo de las alertas por barrio también depende del barrio de la emergencia. Sin barrios, el alta descifra las emergencias abiertas |
 
@@ -150,7 +160,8 @@ El vínculo de las emergencias abiertas (punto 1.1) es `linkOpenEmergenciesToZon
 
 Se hace más fácil:
 
-- Que una alerta alta o crítica se vea en el tablero y en Analítica sin eventos ni tablas nuevas.
+- Que una alerta alta o crítica se vea en el tablero y en Analítica sin tablas nuevas.
+- Que los otros módulos sepan, por el bus, que Emergencias recibió cada alerta.
 - Mantener una sola forma de zona (punto y radio) para todos los contextos.
 - Que la suba alcance a todo el barrio de la alerta, y no solo a los alrededores de los puntos que consulta Espacios.
 
@@ -165,6 +176,7 @@ Se hace más difícil, y lo aceptamos:
 - **Una alerta que empieza más tarde** (`vigenciaDesde` en el futuro) vincula a las abiertas al llegar, pero una emergencia creada entre la llegada y el comienzo no se vincula: el vínculo al crear solo mira los contextos en curso.
 - **Queda una ventana de carrera:** una emergencia que se crea mientras corre la transacción del alta puede quedar sin vincular, porque ninguna de las dos ve lo que la otra todavía no confirmó. Es una ventana de milisegundos.
 - **Una sola preventiva por alerta, en el primer punto,** aunque la alerta tenga varios.
+- **Un tipo más que publica Emergencias** (`CriticidadClimaticaConfirmada`), que tiene que estar registrado en el catálogo del gateway. Una republicación de Espacios con otro `eventId` manda otra confirmación.
 - **Los niveles son criterios técnicos de demostración de Espacios,** no alertas oficiales.
 
 Neutras:
@@ -177,7 +189,7 @@ Neutras:
 - [ ] ¿Subir en todo el barrio de la alerta es lo que se espera, o alcanza con los alrededores de los puntos?
 - [ ] ¿Los radios de 1000 m para `CRITICA` y 500 m para `ALTA` son los correctos para las alertas sin barrios?
 - [ ] ¿`ALTA` y `CRITICA` crean una emergencia `PREVENTIVA`, o solo suben la prioridad?
-- [ ] ¿Alcanza con la `PREVENTIVA` como aviso al dispatcher, o hace falta un banner aparte?
+- [ ] ¿Alcanzan la `PREVENTIVA` y el banner del tablero como aviso al dispatcher?
 - [ ] ¿Está bien que suban las emergencias que ya estaban abiertas cuando llega la alerta, aunque con los eventos públicos no pase?
 
 ## Historial
@@ -185,3 +197,4 @@ Neutras:
 - 2026-11-16: creación del ADR (estado: propuesta)
 - 2026-11-17: la zona pasa a ser un contexto por barrio de la alerta, con el círculo que cubre el barrio y el filtro por barrio al vincular. Los puntos con radio por nivel quedan para las alertas sin barrios del catálogo. Se suman las dos alternativas evaluadas (punto con radio por nivel y círculo sin filtro).
 - 2026-11-17: al dar de alta cada contexto también se vinculan las emergencias que ya estaban abiertas en la zona (punto 1.1). Para las alertas climáticas, se aparta de la regla del ADR de radio que solo vincula al crear la emergencia.
+- 2026-11-17: Emergencias confirma por el EDA cada alerta recibida (`com.citypass.emergencias.CriticidadClimaticaConfirmada`, mismo record que Residuos), con `CONFIRMACION_CLIMA_ENABLED`. La sección 5 pasa a describir también el banner del tablero, que ya existía.
