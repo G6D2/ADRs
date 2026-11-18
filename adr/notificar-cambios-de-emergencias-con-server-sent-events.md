@@ -1,6 +1,6 @@
 # Notificar cambios de emergencias con Server-Sent Events
 
-- Estado: propuesta
+- Estado: pospuesta
 - Fecha: 2026-11-13
 - Decisores: @Salterm27 (la propuso) y Producto (@juanimoli), que la revisó. Se acepta o se descarta después de la demo del 26/11/2026.
 - Reemplaza a: —
@@ -170,3 +170,4 @@ implementa después de la demo del 26/11/2026.
 - 2026-11-15: revisión de Producto. Suma la conexión directa de Neon para
   el `LISTEN` y deja la implementación para después de la demo del
   26/11/2026. Sigue en propuesta.
+- 2026-11-18: cambio de estado: propuesta → pospuesta (Producto, @juanimoli. Hoy las vistas se refrescan cada 30 s (ADR aceptado); el push necesita instancias que no se duerman (plan free de Render). Deuda: demo-repository#105.)
