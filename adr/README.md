@@ -7,7 +7,7 @@ Para regenerarlo: `tools/adr index`
 |-----|--------|-------|
 | [Adoptar Next.js con App Router y un BFF](adoptar-next-js-con-app-router-y-un-bff.md) | aceptada | 2026-09-22 |
 | [Autorizar por JWT con ownership y endurecer el perímetro HTTP](autorizar-por-jwt-con-ownership-y-endurecer-el-perimetro-http.md) | aceptada | 2026-09-24 |
-| [Calcular los recursos requeridos con una tabla de reglas](calcular-los-recursos-requeridos-con-una-tabla-de-reglas.md) | aceptada | 2026-10-16 |
+| [Calcular los recursos requeridos con una tabla de reglas](calcular-los-recursos-requeridos-con-una-tabla-de-reglas.md) | pospuesta | 2026-10-16 |
 | [Cifrar ubicación y PII sensible en reposo con AES-256-GCM](cifrar-ubicacion-y-pii-sensible-en-reposo.md) | aceptada | 2026-09-24 |
 | [Consumir eventos externos con un listener y reglas por evento](consumir-eventos-externos-con-un-listener-y-reglas-por-evento.md) | aceptada | 2026-10-16 |
 | [Consumir todos los eventos externos con un solo consumer](consumir-todos-los-eventos-externos-con-un-solo-consumer.md) | aceptada | 2026-11-16 |
@@ -18,7 +18,7 @@ Para regenerarlo: `tools/adr index`
 | [Elevar temporalmente la prioridad con contextos de zona](elevar-temporalmente-la-prioridad-con-contextos-de-zona.md) | reemplazada | 2026-10-08 |
 | [Expirar las emergencias abiertas sin cambios de estado](expirar-las-emergencias-abiertas-sin-cambios-de-estado.md) | aceptada | 2026-11-17 |
 | [Guardar el barrio de la emergencia al crearla](guardar-el-barrio-de-la-emergencia-al-crearla.md) | aceptada | 2026-10-16 |
-| [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | aceptada | 2026-10-16 |
+| [Informar los recursos requeridos como un campo del cambio de estado](informar-los-recursos-requeridos-como-un-campo-del-cambio-de-estado.md) | pospuesta | 2026-10-16 |
 | [Modelar incidentes con identificador propio](modelar-incidentes-con-identificador-propio.md) | aceptada | 2026-09-09 |
 | [Notificar cambios de emergencias con Server-Sent Events](notificar-cambios-de-emergencias-con-server-sent-events.md) | propuesta | 2026-11-13 |
 | [Programar cobertura preventiva ante eventos y reservas grandes](programar-cobertura-preventiva-ante-eventos-y-reservas-grandes.md) | aceptada | 2026-11-17 |

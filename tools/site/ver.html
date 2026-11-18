@@ -76,7 +76,7 @@ function mdRender(md) {
     if (h1) document.title = h1.textContent + ' · ADR';
     // Resalta el estado como chip
     for (const li of cont.querySelectorAll('li')) {
-      const m = li.textContent.match(/^Estado:\s*(propuesta|aceptada|rechazada|obsoleta|reemplazada)$/);
+      const m = li.textContent.match(/^Estado:\s*(propuesta|aceptada|pospuesta|rechazada|obsoleta|reemplazada)$/);
       if (m) li.innerHTML = 'Estado: <span class="badge ' + m[1] + '">' + m[1] + '</span>';
     }
     const data = await (await fetch('adrs.json')).json();

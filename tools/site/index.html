@@ -34,7 +34,7 @@
 <script>
 (async () => {
   const data = await (await fetch('adrs.json')).json();
-  const ESTADOS = ['propuesta', 'aceptada', 'rechazada', 'obsoleta', 'reemplazada'];
+  const ESTADOS = ['propuesta', 'aceptada', 'pospuesta', 'rechazada', 'obsoleta', 'reemplazada'];
 
   document.getElementById('repo-link').href = data.repo;
   document.getElementById('proponer').href =
