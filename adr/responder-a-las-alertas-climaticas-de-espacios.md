@@ -1,10 +1,10 @@
 # Responder a las alertas climáticas de Espacios
 
-- Estado: aceptada
+- Estado: reemplazada
 - Fecha: 2026-11-16
 - Decisores: @Salterm27 (reglas de negocio e implementación), @KevinAlajarin (redacción). Lo confirma Producto (@juanimoli).
 - Reemplaza a: —
-- Reemplazada por: —
+- Reemplazada por: [Responder a las alertas climáticas por barrio](responder-a-las-alertas-climaticas-por-barrio.md)
 
 ## Contexto
 
@@ -149,3 +149,4 @@ Neutras:
 - 2026-11-16: creación del ADR (estado: propuesta)
 - 2026-11-17: implementado en el backend (PR #122, que retoma el #117) y activo en producción; el front suma un banner de alertas activas (Frontend #79) sobre `GET /api/contextos-zona/activos` (backend #121)
 - 2026-11-17: cambio de estado: propuesta → aceptada
+- 2026-11-18: aceptada → reemplazada por [Responder a las alertas climáticas por barrio](responder-a-las-alertas-climaticas-por-barrio.md)
