@@ -50,15 +50,26 @@ El círculo se pasa a los barrios vecinos: el de Palermo alcanza pedazos de Belg
 
 Si la alerta no trae ningún barrio del catálogo, **cada punto de `ubicaciones`** genera un contexto con su `latitud`, `longitud` y el radio del nivel (punto 2), sin mirar el barrio. Así una alerta sin barrios no se pierde.
 
-En los dos casos funciona igual que un evento público:
+En los dos casos funciona como un evento público, salvo por el vínculo de las emergencias que ya estaban abiertas (punto 1.1):
 
-- el vínculo se mide una sola vez, al crear la emergencia;
+- el vínculo se mide al crear la emergencia y, además, al dar de alta el contexto;
 - la suba se calcula en SQL al leer;
 - es de un nivel, con tope en la prioridad máxima;
 - varios contextos sobre la misma emergencia no se acumulan;
 - las `PREVENTIVA` no suben.
 
 La referencia externa de cada contexto es `<alertaId>#<índice>`, con la posición del barrio en `barrios` o la del punto en `ubicaciones`. `alertaId` agrupa los contextos para darlos de baja juntos. Los barrios fuera del catálogo y los puntos sin coordenadas numéricas se descartan.
+
+#### 1.1 Emergencias que ya estaban abiertas
+
+Cuando llega la alerta, la tormenta ya empezó, y las emergencias abiertas en la zona son justo las que están bajo ella. Por eso, **al dar de alta cada contexto también se vinculan las emergencias que ya estaban abiertas** en esa zona, en la misma transacción. Los eventos públicos no hacen esto: siguen con la regla del ADR de radio.
+
+Alcanza a las emergencias que no están en estado terminal, no son `PREVENTIVA` y tienen ubicación sin anonimizar, igual que el vínculo al crear (sin coordenadas no se vincula, y una anonimizada ya perdió sus vínculos):
+
+- **Zona por barrio:** alcanza con el barrio guardado en la emergencia, sin descifrar nada. Todo punto del barrio cae dentro del círculo, y el filtro ya exige el barrio.
+- **Zona por punto:** se descifran las emergencias abiertas y se mide la distancia en memoria. Es el costo que el ADR de radio quería evitar, pero acá pasa una vez por contexto, al darlo de alta, y solo en las alertas sin barrios.
+
+El vínculo se escribe igual que al crear la emergencia: un vínculo que ya existe queda como estaba, y con el evento de vínculo encendido sale `EmergenciaVinculadaAContextoZona`. Si la alerta ya se finalizó, no se da de alta nada y tampoco se vincula.
 
 La ventana del contexto es `vigenciaDesde`–`vigenciaHasta`.
 
@@ -120,6 +131,8 @@ La base es el código del PR #117 de `emergencias-backend`. Respecto de ese PR c
 
 La zona por barrio suma tres piezas al código del PR #122: el círculo de cada barrio se calcula una vez desde el catálogo (`zonaDelBarrio` en `src/domain/barrio.js`); cada contexto por barrio guarda `barrios = [su barrio]` (columna de V33, sin migración nueva); y `linkZoneContexts` exige el barrio cuando el contexto lo tiene. Los eventos comunitarios no tienen barrios y no cambian.
 
+El vínculo de las emergencias abiertas (punto 1.1) es `linkOpenEmergenciesToZoneContext` en `EmergencyRepository`, que llama el handler del alta después de cada contexto que aplica. La escritura del vínculo y su evento queda en un solo lugar (`writeZoneContextLinks`), que usan el alta de la emergencia y el alta del contexto.
+
 ## Alternativas consideradas
 
 | Alternativa | A favor | En contra |
@@ -130,7 +143,8 @@ La zona por barrio suma tres piezas al código del PR #122: el círculo de cada 
 | Solo contextos, sin emergencia preventiva | Menos cambios | El dispatcher no tiene una tarea de despliegue y Analítica no tiene emergencias por evento climático |
 | Contexto por punto con radio por nivel (PR #122) | Un solo valor por nivel. No necesita el catálogo de barrios | La suba se limita a los alrededores de los puntos que consulta Espacios: una emergencia del mismo barrio a 2 km no sube |
 | Círculo que cubre el barrio, sin filtrar por barrio | El mismo vínculo por distancia que un evento | El círculo se pasa a los vecinos: el de Palermo (~3,8 km) sube emergencias de Belgrano, Colegiales, Recoleta y Villa Crespo |
-| **Círculo que cubre el barrio y filtro por barrio al vincular, con el punto como respaldo, y preventiva para `ALTA` y `CRITICA`** (elegida) | Sube en todo el barrio de la alerta y solo ahí. Reusa contextos, vínculo y coberturas; no descifra nada al leer. Sigue la política por nivel de Espacios | El vínculo de las alertas por barrio también depende del barrio de la emergencia |
+| Vincular solo al crear la emergencia (regla del ADR de radio) | Un solo momento de vínculo. Nunca descifra ubicaciones | Las emergencias abiertas cuando llega la alerta, que son las que ya están bajo la tormenta, no suben |
+| **Círculo que cubre el barrio y filtro por barrio al vincular, con el punto como respaldo, vínculo también de las abiertas al dar de alta, y preventiva para `ALTA` y `CRITICA`** (elegida) | Sube en todo el barrio de la alerta y solo ahí, también en las emergencias que ya estaban abiertas. Reusa contextos, vínculo y coberturas; no descifra nada al leer. Sigue la política por nivel de Espacios | El vínculo de las alertas por barrio también depende del barrio de la emergencia. Sin barrios, el alta descifra las emergencias abiertas |
 
 ## Consecuencias
 
@@ -146,14 +160,17 @@ Se hace más difícil, y lo aceptamos:
 - **El círculo de un barrio grande es grande** (Palermo ~3,8 km, Recoleta ~4,1 km). El filtro por barrio evita que alcance a los vecinos, pero el centro es aproximado (promedio de vértices).
 - **Una emergencia sin barrio no sube por una alerta por barrio.** Pasa con las de fuera de CABA o sin ubicación.
 - **Si la alerta no trae barrios del catálogo, vuelve a los puntos** con el radio del nivel: la suba se limita a sus alrededores.
-- **Las emergencias abiertas antes de la alerta no suben.** Es la misma regla del ADR de radio.
+- **Las emergencias abiertas antes de la alerta sí suben, a diferencia de los eventos públicos.** Para las alertas climáticas, este ADR se aparta de la regla 1 del ADR de radio («solo suben las emergencias creadas con el evento en curso»).
+- **Sin barrios, el alta descifra las emergencias abiertas** una vez por contexto, para medir la distancia.
+- **Una alerta que empieza más tarde** (`vigenciaDesde` en el futuro) vincula a las abiertas al llegar, pero una emergencia creada entre la llegada y el comienzo no se vincula: el vínculo al crear solo mira los contextos en curso.
+- **Queda una ventana de carrera:** una emergencia que se crea mientras corre la transacción del alta puede quedar sin vincular, porque ninguna de las dos ve lo que la otra todavía no confirmó. Es una ventana de milisegundos.
 - **Una sola preventiva por alerta, en el primer punto,** aunque la alerta tenga varios.
 - **Los niveles son criterios técnicos de demostración de Espacios,** no alertas oficiales.
 
 Neutras:
 
 - `EmergenciaCreada` no cambia: `EVENTO_CLIMATICO` ya está en el enum de `causaTipo`.
-- Este ADR responde la pregunta abierta del ADR de radio sobre la alerta climática y el aviso climático que había quedado sin implementar.
+- Este ADR responde la pregunta abierta del ADR de radio sobre la alerta climática y el aviso climático que había quedado sin implementar. Para las alertas climáticas, también responde la de si suben las emergencias anteriores al evento: sí, midiendo al registrar el contexto.
 
 ### Preguntas para Producto
 
@@ -161,8 +178,10 @@ Neutras:
 - [ ] ¿Los radios de 1000 m para `CRITICA` y 500 m para `ALTA` son los correctos para las alertas sin barrios?
 - [ ] ¿`ALTA` y `CRITICA` crean una emergencia `PREVENTIVA`, o solo suben la prioridad?
 - [ ] ¿Alcanza con la `PREVENTIVA` como aviso al dispatcher, o hace falta un banner aparte?
+- [ ] ¿Está bien que suban las emergencias que ya estaban abiertas cuando llega la alerta, aunque con los eventos públicos no pase?
 
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
 - 2026-11-17: la zona pasa a ser un contexto por barrio de la alerta, con el círculo que cubre el barrio y el filtro por barrio al vincular. Los puntos con radio por nivel quedan para las alertas sin barrios del catálogo. Se suman las dos alternativas evaluadas (punto con radio por nivel y círculo sin filtro).
+- 2026-11-17: al dar de alta cada contexto también se vinculan las emergencias que ya estaban abiertas en la zona (punto 1.1). Para las alertas climáticas, se aparta de la regla del ADR de radio que solo vincula al crear la emergencia.
