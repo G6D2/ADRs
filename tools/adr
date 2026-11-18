@@ -5,7 +5,7 @@
 # Sigue los lineamientos de https://github.com/G6D2/architecture-decision-record:
 #   - Plantilla estilo Michael Nygard (Contexto / Decisión / Consecuencias)
 #   - Nombres de archivo: frase verbal en imperativo, minúsculas-con-guiones
-#   - Estados: propuesta, aceptada, rechazada, obsoleta, reemplazada
+#   - Estados: propuesta, aceptada, pospuesta, rechazada, obsoleta, reemplazada
 #   - Inmutabilidad: un ADR aceptado no se edita, se reemplaza con uno nuevo
 #
 # Uso: tools/adr <comando> [argumentos]   (ejecutar desde la raíz del repo)
@@ -15,7 +15,7 @@ set -euo pipefail
 ADR_DIR="${ADR_DIR:-adr}"
 TEMPLATE="${ADR_TEMPLATE:-$ADR_DIR/templates/plantilla.md}"
 INDEX_FILE="$ADR_DIR/README.md"
-VALID_STATUSES="propuesta aceptada rechazada obsoleta reemplazada"
+VALID_STATUSES="propuesta aceptada pospuesta rechazada obsoleta reemplazada"
 
 usage() {
   cat <<'EOF'
@@ -29,7 +29,7 @@ Comandos:
   index                       Regenera el índice (adr/README.md).
   status <archivo> <estado>   Cambia el estado de un ADR y lo registra en su
                               historial. Estados: propuesta | aceptada |
-                              rechazada | obsoleta | reemplazada
+                              pospuesta | rechazada | obsoleta | reemplazada
   supersede <archivo> <título>  Crea un ADR nuevo que reemplaza a uno existente
                               y enlaza ambos documentos.
   lint                        Valida que todos los ADRs cumplan la convención

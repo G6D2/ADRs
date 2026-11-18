@@ -6,6 +6,8 @@
 - Reemplaza a: —
 - Reemplazada por: —
 
+**Aviso (17/11/2026):** dos cosas de este texto quedaron viejas: quién dispara la intervención por la ciclovía y el `group.id` por listener. Ver la sección «Estado actual (17/11/2026)», al final.
+
 ## Contexto
 
 [Usar Kafka como bus de eventos](usar-kafka-como-bus-de-eventos.md) dejó previsto que Emergencias consuma eventos de otros módulos, con deduplicación por `metadata.eventId` y una tabla de eventos procesados. En `main` ya está el esqueleto del consumidor (`src/listeners/`), apagado por defecto y sin reglas.
@@ -79,8 +81,43 @@ Pendiente de definir:
 - Si vuelve la carga manual de eventos desde el tablero, que estaba en el PR #62 cerrado.
 - Retención de la tabla `eventos_procesados`.
 
+## Estado actual (17/11/2026)
+
+Este ADR está aceptado y su decisión sigue vigente, así que el texto de arriba no se reescribe. Desde que se aceptó cambiaron dos cosas que ese texto describe distinto, y se implementó lo que figuraba como pendiente.
+
+**1. La intervención por la ciclovía la dispara Movilidad, no Reclamos.** Desde el PR #100 del backend (13/11), el flujo es Reclamos → Movilidad → Emergencias: Movilidad evalúa la obstrucción y publica `com.citypass.movilidad.EmergenciaSolicitada`, que crea la intervención. `RECLAMO_INTERVENCION_DISPARADOR` elige quién la crea:
+
+| Valor | Quién crea la intervención |
+|---|---|
+| `movilidad` (default) | Solo `EmergenciaSolicitada`. |
+| `reclamo` | Solo `com.citypass.reclamos.ReclamoCreado.v3`, como el PR #93. Es el plan B. |
+| `ambos` | El primero de los dos que llegue; el otro la encuentra creada y no duplica. También es plan B. |
+
+Un valor que no existe frena el arranque. El cierre sigue llegando por `com.citypass.reclamos.ReclamoActualizado` y no depende de la variable: cuando el reclamo llega a un estado final, la intervención que todavía no se despachó se cancela.
+
+**2. Hay un solo consumer para todos los listeners.** El texto de arriba registra, como estado al 02/11, un `group.id` por listener (`emergencias-backend.<Clase>`). El prefijo pasó a `com.citypass.emergencias.` el 05/11 (PR #72), y desde el PR #112 (16/11) hay **un solo consumer**, con `group.id` `com.citypass.emergencias.eventos`, suscripto a los tópicos de todos los listeners. Un listener interpreta un tipo de evento y no abre conexiones. La decisión y sus motivos están en [Consumir todos los eventos externos con un solo consumer](consumir-todos-los-eventos-externos-con-un-solo-consumer.md).
+
+**3. Lo que faltaba implementar al 02/11 ya está en `main`:**
+
+| Pendiente al 02/11 | Estado al 17/11 |
+|---|---|
+| Deserializar Avro | `event-decoder.js` lee el formato Confluent y resuelve el schema contra el Schema Registry del gateway, con el mismo token que el broker (PR #72 y #73). |
+| SASL/OAUTHBEARER | `kafka.service.js` se conecta con SASL_SSL y el token del cliente `grupo5` del Login Federado (PR #72). |
+| Prefijo del `group.id` | Ver el punto 2. |
+| Deduplicación y separación de errores | `eventos_procesados` en la misma transacción que los efectos; `error-classifier.js` reintenta lo transitorio y descarta lo permanente (`DISCARDED`) (PR #72). |
+| La factory | `OutcomeFactory` ejecuta los resultados con handlers registrados en `src/index.js` (PR #72). |
+
+**4. Lo que estaba pendiente de definir:**
+
+- Kafka contra el bus real: el backend consume en producción del broker del Grupo 1. No hizo falta el webhook.
+- La carga manual de eventos desde el tablero no volvió.
+- La retención de `eventos_procesados` sigue sin definir: la tabla no tiene purga.
+
+**5. Listeners en `main` al 17/11:** 8, en tres casos de negocio. Cobertura preventiva: `EventoComunitarioPublicado`, `EventoCancelado`, `ActividadCreada.v3` y `ReservaCreada`. Reclamo por ciclovía: `EmergenciaSolicitada`, `ReclamoCreado.v3` y `ReclamoActualizado`. Movilidad: `EmergenciaBicicleta`.
+
 ## Historial
 
 - 2026-10-16: creación del ADR (estado: propuesta)
 - 2026-11-02: se aplica el review del 2026-10-18 y la decisión de Producto del 2026-10-26. El listener queda dentro del backend, se suman el webhook como alternativa y el costo de SASL y Avro, y se alinea con el paquete `src/listeners/` de `main` (reglas en vez de mappers). Cambia el título.
 - 2026-11-05: cambio de estado: propuesta → aceptada
+- 2026-11-17: se agrega la sección «Estado actual (17/11/2026)» y un aviso al principio. La intervención por la ciclovía la dispara `EmergenciaSolicitada` de Movilidad (backend #100) y hay un solo consumer con `group.id` `com.citypass.emergencias.eventos` (backend #112). El texto aceptado no se modifica.

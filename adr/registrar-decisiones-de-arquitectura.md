@@ -44,3 +44,6 @@ Vamos a usar Architecture Decision Records (ADRs) siguiendo los lineamientos de
 
 - 2026-08-13: creación del ADR (estado: propuesta)
 - 2026-08-13: cambio de estado: propuesta → aceptada
+- 2026-11-17: se suma el estado `pospuesta`, para una decisión aceptada que se deja
+  para más adelante sin implementarla (ver el README). El resto de la decisión
+  no cambia.

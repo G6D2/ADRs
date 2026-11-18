@@ -1,6 +1,6 @@
 # Responder a las alertas climáticas de Espacios
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-16
 - Decisores: @Salterm27 (reglas de negocio e implementación), @KevinAlajarin (redacción). Lo confirma Producto (@juanimoli).
 - Reemplaza a: —
@@ -174,14 +174,14 @@ Neutras:
 
 ### Preguntas para Producto
 
-- [ ] ¿Subir en todo el barrio de la alerta es lo que se espera, o alcanza con los alrededores de los puntos?
-- [ ] ¿Los radios de 1000 m para `CRITICA` y 500 m para `ALTA` son los correctos para las alertas sin barrios?
-- [ ] ¿`ALTA` y `CRITICA` crean una emergencia `PREVENTIVA`, o solo suben la prioridad?
-- [ ] ¿Alcanza con la `PREVENTIVA` como aviso al dispatcher, o hace falta un banner aparte?
-- [ ] ¿Está bien que suban las emergencias que ya estaban abiertas cuando llega la alerta, aunque con los eventos públicos no pase?
+- [x] ¿Los radios de 1000 m para `CRITICA` y 500 m para `ALTA` son los correctos? **Sí** (Producto, 17/11).
+- [x] ¿`ALTA` y `CRITICA` crean una emergencia `PREVENTIVA`, o solo suben la prioridad? **Las dos cosas** (Producto, 17/11).
+- [x] ¿Alcanza con la `PREVENTIVA` como aviso al dispatcher, o hace falta un banner aparte? **Se suma un banner en el front (Frontend #79) que lee `GET /api/contextos-zona/activos` (backend #121). Es solo una vista: no agrega eventos al bus ni cambia la zona, el vínculo ni la suba** (Producto, 17/11).
 
 ## Historial
 
 - 2026-11-16: creación del ADR (estado: propuesta)
 - 2026-11-17: la zona pasa a ser un contexto por barrio de la alerta, con el círculo que cubre el barrio y el filtro por barrio al vincular. Los puntos con radio por nivel quedan para las alertas sin barrios del catálogo. Se suman las dos alternativas evaluadas (punto con radio por nivel y círculo sin filtro).
 - 2026-11-17: al dar de alta cada contexto también se vinculan las emergencias que ya estaban abiertas en la zona (punto 1.1). Para las alertas climáticas, se aparta de la regla del ADR de radio que solo vincula al crear la emergencia.
+- 2026-11-17: implementado en el backend (PR #122, que retoma el #117) y activo en producción; el front suma un banner de alertas activas (Frontend #79) sobre `GET /api/contextos-zona/activos` (backend #121)
+- 2026-11-17: cambio de estado: propuesta → aceptada
