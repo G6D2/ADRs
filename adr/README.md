@@ -28,7 +28,8 @@ Para regenerarlo: `tools/adr index`
 | [Refrescar las vistas cada 30 segundos](refrescar-las-vistas-cada-30-segundos.md) | aceptada | 2026-11-16 |
 | [Registrar decisiones de arquitectura](registrar-decisiones-de-arquitectura.md) | aceptada | 2026-08-13 |
 | [Requerir aprobación de Producto en los PRs](requerir-aprobacion-de-producto-en-los-prs.md) | aceptada | 2026-08-13 |
-| [Responder a las alertas climáticas de Espacios](responder-a-las-alertas-climaticas-de-espacios.md) | aceptada | 2026-11-16 |
+| [Responder a las alertas climáticas de Espacios](responder-a-las-alertas-climaticas-de-espacios.md) | reemplazada | 2026-11-16 |
+| [Responder a las alertas climáticas por barrio](responder-a-las-alertas-climaticas-por-barrio.md) | aceptada | 2026-11-18 |
 | [Usar DBSCAN para agrupar emergencias](usar-dbscan-para-agrupar-emergencias.md) | aceptada | 2026-09-09 |
 | [Usar el Login Federado para el personal y cuentas locales para los ciudadanos](usar-el-login-federado-para-el-personal-y-cuentas-locales-para-los-ciudadanos.md) | aceptada | 2026-11-17 |
 | [Usar GitHub Actions como plataforma de CI/CD](usar-github-actions-para-ci-cd.md) | aceptada | 2026-09-24 |
