@@ -1,6 +1,6 @@
 # Refrescar las vistas cada 30 segundos
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-16
 - Decisores: @Salterm27 (la propuso y la implementó en el front) y Producto (@juanimoli), que la revisó.
 - Reemplaza a: —
@@ -133,3 +133,5 @@ Neutras:
 - 2026-11-16: creación del ADR (estado: propuesta)
 - 2026-11-16: revisión de Producto. Se enlaza con el ADR de Server-Sent
   Events. Sigue en propuesta.
+- 2026-11-17: cambio de estado: propuesta → aceptada (Producto, @juanimoli). Es lo que
+  corre en producción; el push con SSE queda pospuesto en su propio ADR.
